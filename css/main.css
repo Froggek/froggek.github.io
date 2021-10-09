@@ -1,0 +1,33 @@
+#game-grid {
+    /*width: 90%; */
+    border-collapse: collapse; 
+
+    /* To mlake the table centered */
+    margin-left: auto; 
+    margin-right: auto; 
+}
+
+#game-grid td {
+    height: 50px;
+    width: 50px; 
+    border: 1px solid black; 
+}
+
+/*#game-grid td {
+    display: block; 
+    float: left; 
+    width: 32%; 
+    padding-bottom: 32%; 
+
+    border: 1px solid black; 
+}
+
+#game-grid td div {
+    position: absolute; 
+}
+
+
+#game-grid, #game-grid tr, #game-grid tbody {
+    display: block;  
+    width: 100%; 
+} */
