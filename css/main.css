@@ -8,8 +8,8 @@
 }
 
 #game-grid td {
-    height: 50px;
-    width: 50px; 
+    height:15px;
+    width: 15px; 
     border: 1px solid black; 
 }
 
