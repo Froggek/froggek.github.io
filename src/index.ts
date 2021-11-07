@@ -1,6 +1,5 @@
+import { table } from "console";
 import $ from "jquery"; 
-import { execPath } from "process";
-import { getEnvironmentData } from "worker_threads";
 
 type CellCoordinates = string; 
 type ListOfCells = Map<CellCoordinates, boolean>; // "x,y" => isAlive?
@@ -49,6 +48,89 @@ function getDeadNeighbors(coords: CellCoordinates, livingCells: ListOfCells): Ce
     return neighborCoords.filter((neighbor: CellCoordinates) => { return ! livingCells.has(neighbor) }); 
 }
 
+/**  Applying rules 
+ * 1-Any live cell with two or three live neighbours survives.
+ * 2-Any dead cell with three live neighbours becomes a live cell.
+ * 3-All other live cells die in the next generation. 
+ *      Similarly, all other dead cells stay dead. 
+*/
+function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
+    // Processing live cells
+    pLiveCells.forEach((v, k) => {
+        const deadNeighbors: CellCoordinates[] = getDeadNeighbors(k, pLiveCells); 
+        
+        // Live cells in under/overpopulation die 
+        const nbOfLivingNeighbors: number = 8 - deadNeighbors.length; 
+        if ((nbOfLivingNeighbors < 2) || (nbOfLivingNeighbors > 3))
+            pLiveCells.set(k, false); 
+
+        // Dead neighbors need to be processed ... later on
+        deadNeighbors.forEach(
+            (deadCellCoords: CellCoordinates) => { pDeadCells.set(deadCellCoords, false) });
+    }); 
+
+    // Processing dead cells
+    pDeadCells.forEach((v, k) => {
+        if (getNbOfLivingNeighbors(k, pLiveCells) === 3)
+            pDeadCells.set(k, true); 
+    }); 
+
+    // Moving and cleansing 
+    pDeadCells.forEach((v, k) => {
+        if (v)
+            pLiveCells.set(k, true); 
+    }); 
+
+    pDeadCells = new Map(); 
+
+    for (const [k, v] of pLiveCells) {
+        if (! v)
+            pLiveCells.delete(k); 
+    }
+}
+
+function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
+    let tableBody: JQuery<HTMLElement> = $('#game-grid-body'); 
+
+    const NB_ROWS:number = 30; 
+    const SHIFT_Y: number = Math.floor(NB_ROWS / 2); 
+    const NB_COLUMNS:number = 30; 
+    const SHIFT_X:number = Math.floor(NB_COLUMNS / 2); 
+
+    tableBody.html(''); 
+
+    for (let i:number = 0; i < NB_ROWS; i++) {
+        let tr: string = '<tr>';
+
+        for (let j:number = 0; j < NB_COLUMNS; j++) {
+            tr += '<td ' 
+                + (pLiveCells.has(getCoordinatesFromInt(j - SHIFT_X, i - SHIFT_Y)) 
+                    ? 'class="dead-cell"' : '') 
+                + ' ></td>'; 
+        }
+        tableBody.append(tr + '</tr>'); 
+    }
+
+
+    let debug: string = ''; 
+    pLiveCells.forEach((v, k) => {
+        debug += k + ': ' + v + '<br/>'; 
+    }); 
+
+    debug += '=====================<br/>';
+
+    pDeadCells.forEach((v, k) => {
+        debug += k + ': ' + v + '<br/>'; 
+    }); 
+
+    $('#debug').html(debug); 
+}
+
+function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
+    applyLifeRules(pLiveCells, pDeadCells); 
+    updateUI(pLiveCells, pDeadCells); 
+}
+
 // Initialization 
 let liveCells:ListOfCells = new Map();
 let deadCells: ListOfCells = new Map(); 
@@ -56,71 +138,9 @@ liveCells.set('0,0', true);
 liveCells.set('1,0', true);
 liveCells.set('2,0', true);
 
+updateUI(liveCells, deadCells); 
 
+let repeat = setInterval(() => { lifeRound(liveCells, deadCells) }, 1000); 
 
-/**  Applying rules 
- * 1-Any live cell with two or three live neighbours survives.
- * 2-Any dead cell with three live neighbours becomes a live cell.
- * 3-All other live cells die in the next generation. 
- *      Similarly, all other dead cells stay dead. 
-*/
-// Processing live cells
-liveCells.forEach((v, k) => {
-    const deadNeighbors: CellCoordinates[] = getDeadNeighbors(k, liveCells); 
-    
-    // Live cells in under/overpopulation die 
-    const nbOfLivingNeighbors: number = 8 - deadNeighbors.length; 
-    if ((nbOfLivingNeighbors < 2) || (nbOfLivingNeighbors > 3))
-        liveCells.set(k, false); 
-
-    // Dead neighbors need to be processed ... later on
-    deadNeighbors.forEach((deadCellCoords: CellCoordinates) => { deadCells.set(deadCellCoords, false) });
-}); 
-
-// Processing dead cells
-deadCells.forEach((v, k) => {
-    if (getNbOfLivingNeighbors(k, liveCells) === 3)
-        deadCells.set(k, true); 
-}); 
-
-// Moving and cleansing 
-deadCells.forEach((v, k) => {
-    if (v)
-        liveCells.set(k, true); 
-}); 
-
-deadCells = new Map(); 
-
-for (const [k, v] of liveCells) {
-    if (! v)
-        liveCells.delete(k); 
-}
-
-// Drawing 
-let tableBody: JQuery<HTMLElement> = $('#game-grid-body'); 
-
-for (let i:number = 0; i < 30; i++) {
-    let tr: string = '<tr>';
-
-    for (let j:number = 0; j < 30; j++) {
-        tr += '<td></td>'; 
-    }
-
-    tableBody.append(tr + '</tr>'); 
-}
-
-
-let debug: string = ''; 
-liveCells.forEach((v, k) => {
-    debug += k + ': ' + v + '<br/>'; 
-}); 
-
-debug += '=====================<br/>';
-
-deadCells.forEach((v, k) => {
-    debug += k + ': ' + v + '<br/>'; 
-}); 
-
-$('#debug').html(debug); 
 
 

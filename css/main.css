@@ -13,6 +13,10 @@
     border: 1px solid black; 
 }
 
+#game-grid .dead-cell {
+    background-color: black;
+}
+
 /*#game-grid td {
     display: block; 
     float: left; 
