@@ -1,0 +1,20 @@
+{
+  "name": "froggek.gameoflife",
+  "version": "1.0.0",
+  "description": "Conway's Game of Life",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Froggek/froggek.github.io.git"
+  },
+  "keywords": [],
+  "author": "Froggek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Froggek/froggek.github.io/issues"
+  },
+  "homepage": "https://github.com/Froggek/froggek.github.io#readme"
+}
