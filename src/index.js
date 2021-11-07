@@ -46,7 +46,7 @@ function applyLifeRules(pLiveCells, pDeadCells) {
         if (v)
             pLiveCells.set(k, true);
     });
-    pDeadCells = new Map();
+    pDeadCells.clear();
     for (const [k, v] of pLiveCells) {
         if (!v)
             pLiveCells.delete(k);
@@ -77,7 +77,6 @@ function updateUI(pLiveCells, pDeadCells) {
     pDeadCells.forEach((v, k) => {
         debug += k + ': ' + v + '<br/>';
     });
-    $('#debug').html(debug);
 }
 function lifeRound(pLiveCells, pDeadCells) {
     applyLifeRules(pLiveCells, pDeadCells);
@@ -86,8 +85,13 @@ function lifeRound(pLiveCells, pDeadCells) {
 let liveCells = new Map();
 let deadCells = new Map();
 liveCells.set('0,0', true);
+liveCells.set('0,1', true);
 liveCells.set('1,0', true);
-liveCells.set('2,0', true);
+liveCells.set('1,1', true);
+liveCells.set('2,2', true);
+liveCells.set('2,3', true);
+liveCells.set('3,2', true);
+liveCells.set('3,3', true);
 updateUI(liveCells, deadCells);
 let repeat = setInterval(() => { lifeRound(liveCells, deadCells); }, 1000);
 //# sourceMappingURL=index.js.map

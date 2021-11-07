@@ -81,7 +81,7 @@ function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void 
             pLiveCells.set(k, true); 
     }); 
 
-    pDeadCells = new Map(); 
+    pDeadCells.clear(); // = new Map(); 
 
     for (const [k, v] of pLiveCells) {
         if (! v)
@@ -123,7 +123,7 @@ function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
         debug += k + ': ' + v + '<br/>'; 
     }); 
 
-    $('#debug').html(debug); 
+    // $('#debug').html(debug); 
 }
 
 function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
@@ -133,10 +133,36 @@ function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
 
 // Initialization 
 let liveCells:ListOfCells = new Map();
-let deadCells: ListOfCells = new Map(); 
-liveCells.set('0,0', true);
+let deadCells: ListOfCells = new Map();
+
+// https://en.wikipedia.org/wiki/Conway's_Game_of_Life#Examples_of_patterns 
+/** Oscillator - Blinker  */
+/*liveCells.set('0,0', true);
 liveCells.set('1,0', true);
 liveCells.set('2,0', true);
+*/ 
+
+/** Oscillator - Toad */
+/*liveCells.set('1,0', true);
+liveCells.set('2,0', true);
+liveCells.set('3,0', true); 
+liveCells.set('0,1', true);
+liveCells.set('1,1', true);
+liveCells.set('2,1', true);
+*/
+
+/** Oscillator - Beacon */
+/* */
+liveCells.set('0,0', true);
+liveCells.set('0,1', true);
+liveCells.set('1,0', true);
+liveCells.set('1,1', true);
+liveCells.set('2,2', true);
+liveCells.set('2,3', true);
+liveCells.set('3,2', true);
+liveCells.set('3,3', true);
+
+
 
 updateUI(liveCells, deadCells); 
 
