@@ -1,5 +1,8 @@
-import $ from "jquery"; 
-import bootstrap from 'bootstrap'; 
+import $ from 'jquery'; 
+import 'bootstrap'; 
+
+import './main.css'; 
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 
 type CellCoordinates = string; 
 type ListOfCells = Map<CellCoordinates, boolean>; // "x,y" => isAlive?

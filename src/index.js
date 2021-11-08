@@ -1,4 +1,7 @@
-import $ from "jquery";
+import $ from 'jquery';
+import 'bootstrap';
+import './main.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 function getIntCoordinates(coordinates) {
     let splitStringCoords = coordinates.split(',');
     if (splitStringCoords.length != 2)
