@@ -1,5 +1,5 @@
-import { table } from "console";
 import $ from "jquery"; 
+import bootstrap from 'bootstrap'; 
 
 type CellCoordinates = string; 
 type ListOfCells = Map<CellCoordinates, boolean>; // "x,y" => isAlive?
