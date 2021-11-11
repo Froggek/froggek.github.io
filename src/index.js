@@ -1,16 +1,14 @@
-import $ from 'jquery';
 import 'bootstrap';
+import './grid-ui';
 import './main.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { clickOnGridListener, clickOnStartListener, updateUI } from './grid-ui';
 function getIntCoordinates(coordinates) {
     let splitStringCoords = coordinates.split(',');
     if (splitStringCoords.length != 2)
         throw "\"" + coordinates + "\" cannot be converted into Integer coordinates";
     return { x: parseInt(splitStringCoords[0]),
         y: parseInt(splitStringCoords[1]) };
-}
-function getCoordinatesFromInt(x, y) {
-    return x + ',' + y;
 }
 function getNeighborCoordinates(coords) {
     let result = new Array();
@@ -55,46 +53,14 @@ function applyLifeRules(pLiveCells, pDeadCells) {
             pLiveCells.delete(k);
     }
 }
-function updateUI(pLiveCells, pDeadCells) {
-    let tableBody = $('#game-grid-body');
-    const NB_ROWS = 30;
-    const SHIFT_Y = Math.floor(NB_ROWS / 2);
-    const NB_COLUMNS = 30;
-    const SHIFT_X = Math.floor(NB_COLUMNS / 2);
-    tableBody.html('');
-    for (let i = 0; i < NB_ROWS; i++) {
-        let tr = '<tr>';
-        for (let j = 0; j < NB_COLUMNS; j++) {
-            tr += '<td '
-                + (pLiveCells.has(getCoordinatesFromInt(j - SHIFT_X, i - SHIFT_Y))
-                    ? 'class="dead-cell"' : '')
-                + ' ></td>';
-        }
-        tableBody.append(tr + '</tr>');
-    }
-    let debug = '';
-    pLiveCells.forEach((v, k) => {
-        debug += k + ': ' + v + '<br/>';
-    });
-    debug += '=====================<br/>';
-    pDeadCells.forEach((v, k) => {
-        debug += k + ': ' + v + '<br/>';
-    });
-}
 function lifeRound(pLiveCells, pDeadCells) {
     applyLifeRules(pLiveCells, pDeadCells);
     updateUI(pLiveCells, pDeadCells);
 }
 let liveCells = new Map();
 let deadCells = new Map();
-liveCells.set('0,0', true);
-liveCells.set('0,1', true);
-liveCells.set('1,0', true);
-liveCells.set('1,1', true);
-liveCells.set('2,2', true);
-liveCells.set('2,3', true);
-liveCells.set('3,2', true);
-liveCells.set('3,3', true);
+let UIComponents = {};
 updateUI(liveCells, deadCells);
-let repeat = setInterval(() => { lifeRound(liveCells, deadCells); }, 1000);
+clickOnGridListener(liveCells, document);
+clickOnStartListener(liveCells, deadCells, lifeRound, UIComponents);
 //# sourceMappingURL=index.js.map

@@ -1,11 +1,13 @@
+// JS 
 import $ from 'jquery'; 
 import 'bootstrap'; 
 
+import './grid-ui'; 
+
+// CSS 
 import './main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
-
-type CellCoordinates = string; 
-type ListOfCells = Map<CellCoordinates, boolean>; // "x,y" => isAlive?
+import { clickOnGridListener, clickOnStartListener, updateUI } from './grid-ui';
 
 function getIntCoordinates(coordinates: CellCoordinates): {x:number, y:number} {
     let splitStringCoords = coordinates.split(',');
@@ -17,9 +19,6 @@ function getIntCoordinates(coordinates: CellCoordinates): {x:number, y:number} {
             y: parseInt(splitStringCoords[1])};  
 }
 
-function getCoordinatesFromInt(x:number, y:number): CellCoordinates {
-    return x + ',' + y; 
-} 
 
 function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
     let result: Array<CellCoordinates> = new Array() ;
@@ -92,43 +91,6 @@ function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void 
     }
 }
 
-function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
-    let tableBody: JQuery<HTMLElement> = $('#game-grid-body'); 
-
-    const NB_ROWS:number = 30; 
-    const SHIFT_Y: number = Math.floor(NB_ROWS / 2); 
-    const NB_COLUMNS:number = 30; 
-    const SHIFT_X:number = Math.floor(NB_COLUMNS / 2); 
-
-    tableBody.html(''); 
-
-    for (let i:number = 0; i < NB_ROWS; i++) {
-        let tr: string = '<tr>';
-
-        for (let j:number = 0; j < NB_COLUMNS; j++) {
-            tr += '<td ' 
-                + (pLiveCells.has(getCoordinatesFromInt(j - SHIFT_X, i - SHIFT_Y)) 
-                    ? 'class="dead-cell"' : '') 
-                + ' ></td>'; 
-        }
-        tableBody.append(tr + '</tr>'); 
-    }
-
-
-    let debug: string = ''; 
-    pLiveCells.forEach((v, k) => {
-        debug += k + ': ' + v + '<br/>'; 
-    }); 
-
-    debug += '=====================<br/>';
-
-    pDeadCells.forEach((v, k) => {
-        debug += k + ': ' + v + '<br/>'; 
-    }); 
-
-    // $('#debug').html(debug); 
-}
-
 function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
     applyLifeRules(pLiveCells, pDeadCells); 
     updateUI(pLiveCells, pDeadCells); 
@@ -155,7 +117,7 @@ liveCells.set('2,1', true);
 */
 
 /** Oscillator - Beacon */
-/* */
+/* 
 liveCells.set('0,0', true);
 liveCells.set('0,1', true);
 liveCells.set('1,0', true);
@@ -164,12 +126,14 @@ liveCells.set('2,2', true);
 liveCells.set('2,3', true);
 liveCells.set('3,2', true);
 liveCells.set('3,3', true);
+*/
 
 
+let UIComponents: GridUIComponents = {}; 
 
+/** HERE WE GO! */
 updateUI(liveCells, deadCells); 
 
-let repeat = setInterval(() => { lifeRound(liveCells, deadCells) }, 1000); 
-
-
+clickOnGridListener(liveCells, document);
+clickOnStartListener(liveCells, deadCells, lifeRound, UIComponents);  
 
