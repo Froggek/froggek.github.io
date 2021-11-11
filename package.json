@@ -1,0 +1,33 @@
+{
+  "name": "froggek.gameoflife",
+  "version": "1.0.0",
+  "description": "Conway's Game of Life",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Froggek/froggek.github.io.git"
+  },
+  "keywords": [],
+  "author": "Froggek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Froggek/froggek.github.io/issues"
+  },
+  "homepage": "https://github.com/Froggek/froggek.github.io#readme",
+  "devDependencies": {
+    "@types/jquery": "^3.5.8",
+    "css-loader": "^6.5.1",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.62.1",
+    "webpack-cli": "^4.9.1"
+  },
+  "dependencies": {
+    "@types/bootstrap": "^5.1.6",
+    "bootstrap": "^5.1.3",
+    "jquery": "^3.6.0"
+  }
+}

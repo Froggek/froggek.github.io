@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true, 
+
+        "strictNullChecks": true, 
+        "allowSyntheticDefaultImports": true, 
+        "esModuleInterop": true, 
+
+        "module": "es2015",
+        "moduleResolution": "Node", // "classic" --> backward compatibility
+
+        "target": "es2015", 
+        //"outFile": "../../built/local/tsc.js",
+    },
+    "include": ["src/*","src/**/*"],
+    "exclude": ["node_modules", "**/*.spec.ts"]
+}
+
