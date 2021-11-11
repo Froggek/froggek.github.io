@@ -1,6 +1,10 @@
 import $ from 'jquery'; 
 
-import { ListOfCells, getCoordinatesFromInt, GridUIComponents } from './grid-types'; 
+import { ListOfCells, getCoordinatesFromInt } from './cellUtils'; 
+
+export interface GridUIComponents {
+    repeat?: NodeJS.Timer; 
+}; 
 
 export function clickOnGridListener(pLivingCells: ListOfCells, pDocument: Document): void {
     $(pDocument).on('click', event => {
