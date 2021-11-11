@@ -1,5 +1,3 @@
-import 'bootstrap';
-import './grid-ui';
 import './main.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { clickOnGridListener, clickOnStartListener, updateUI } from './grid-ui';

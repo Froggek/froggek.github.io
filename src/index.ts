@@ -1,8 +1,8 @@
 // JS 
-import $ from 'jquery'; 
-import 'bootstrap'; 
+// import $ from 'jquery'; // No need of JQuery here! 
+// import 'bootstrap'; // No need here! 
 
-import './grid-ui'; 
+import { CellCoordinates, ListOfCells, GridUIComponents } from './grid-types'; 
 
 // CSS 
 import './main.css'; 

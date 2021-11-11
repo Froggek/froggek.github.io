@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import './grid-types';
+import { getCoordinatesFromInt } from './grid-types';
 export function clickOnGridListener(pLivingCells, pDocument) {
     $(pDocument).on('click', event => {
         $(event.target).toggleClass('dead-cell');

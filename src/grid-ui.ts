@@ -1,6 +1,6 @@
 import $ from 'jquery'; 
 
-import './grid-types'; 
+import { ListOfCells, getCoordinatesFromInt, GridUIComponents } from './grid-types'; 
 
 export function clickOnGridListener(pLivingCells: ListOfCells, pDocument: Document): void {
     $(pDocument).on('click', event => {
@@ -17,7 +17,7 @@ export function clickOnStartListener(pLivingCells: ListOfCells, pDeadCells: List
         pLifeRound: (l: ListOfCells, d: ListOfCells) => void, 
         pComponents: GridUIComponents): void {
 
-    $('#start-btn').on('click', e => {
+    $('#start-btn').on('click', e => { 
         if ($(e.target).text() === 'GO!') {
             pComponents.repeat = setInterval(() => { 
                 pLifeRound(pLivingCells, pDeadCells) }, 1000);
