@@ -2,12 +2,12 @@
 // import $ from 'jquery'; // No need of JQuery here! 
 // import 'bootstrap'; // No need here! 
 
-import { CellCoordinates, ListOfCells, GridUIComponents } from './grid-types'; 
+import { CellCoordinates, ListOfCells, GridUIComponents } from './js/grid-types'; 
 
 // CSS 
-import './main.css'; 
+import './css/main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
-import { clickOnGridListener, clickOnStartListener, updateUI } from './grid-ui';
+import { clickOnGridListener, clickOnStartListener, updateUI } from './js/grid-ui';
 
 function getIntCoordinates(coordinates: CellCoordinates): {x:number, y:number} {
     let splitStringCoords = coordinates.split(',');
