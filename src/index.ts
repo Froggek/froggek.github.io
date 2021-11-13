@@ -1,6 +1,6 @@
 // JS 
 // import $ from 'jquery'; // No need of JQuery here! 
-// import 'bootstrap'; // No need here! 
+import 'bootstrap';  
 
 import { ListOfCells } from './js/cellUtils';
 import { applyLifeRules } from './js/cellRules';  

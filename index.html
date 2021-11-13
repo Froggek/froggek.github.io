@@ -12,31 +12,29 @@
     </head>
     
     <body>
-        
-        <table id="game-grid"> 
-            <tbody id="game-grid-body">
-                
-            </tbody>
-        </table>
+        <div class="d-flex align-items-start">
+            <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <button class="nav-link active" id="v-pills-grid-tab" data-bs-toggle="pill" data-bs-target="#v-pills-grid" type="button" role="tab" aria-controls="v-pills-grid" aria-selected="true">Grid</button>
+                <button class="nav-link" id="v-pills-conf-tab" data-bs-toggle="pill" data-bs-target="#v-pills-conf" type="button" role="tab" aria-controls="v-pills-conf" aria-selected="false">Configuration</button>
+            </div>
+            <div class="tab-content" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-grid" role="tabpanel" aria-labelledby="v-pills-grid-tab">
+                    <table id="game-grid"> 
+                        <tbody id="game-grid-body">
+                            
+                        </tbody>
+                    </table>
+            
+                    <br/><br/>
+                    <div>
+                        <button type="button" id="start-btn" class="btn btn-primary">GO!</button>
+                    </div>
 
-        <div id="debug"></div>
-
-        <br/><br/>
-        <div>
-            <button type="button" id="start-btn" class="btn btn-primary">GO!</button>
+                </div>
+                <div class="tab-pane fade" id="v-pills-conf" role="tabpanel" aria-labelledby="v-pills-conf-tab">...</div>
+            </div>
         </div>
-        <div>
-            <button type="button" class="btn btn-primary">Primary</button>
-            <button type="button" class="btn btn-secondary">Secondary</button>
-            <button type="button" class="btn btn-success">Success</button>
-            <button type="button" class="btn btn-danger">Danger</button>
-            <button type="button" class="btn btn-warning">Warning</button>
-            <button type="button" class="btn btn-info">Info</button>
-            <button type="button" class="btn btn-light">Light</button>
-            <button type="button" class="btn btn-dark">Dark</button>
-
-            <button type="button" class="btn btn-link">Link</button>
-        </div>
+          
 
     </body>
 
