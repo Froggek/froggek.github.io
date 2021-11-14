@@ -5,14 +5,21 @@ import { ListOfCells, getStrCoordinates, serializeSituation2JSON } from './cellU
 export const HTML_GRID_BODY_ID:string = 'game-grid-body'; 
 export const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell'; 
 
+const HTML_START_PAUSE_BTN_ID: string = 'start-btn'; 
+
+export enum GameStatus {
+    PLAYING = "PLAYING", 
+    PAUSED = "PAUSED"
+}; 
 
 export interface GridUIComponents {
+    status: GameStatus; 
     repeat?: NodeJS.Timer; 
 }; 
 
 export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document): void {
     $(pDocument).on('click', event => {
-        let kHtmlElt: JQuery<Document> = $(event.target); 
+        const kHtmlElt: JQuery<Document> = $(event.target); 
 
         // Has the user clicked on the grid?  
         if (kHtmlElt.is(`#${HTML_GRID_BODY_ID} *`)) {
@@ -31,26 +38,39 @@ export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document)
     });     
 }
 
+function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
+    switch (pBtnID) {
+        case HTML_START_PAUSE_BTN_ID: 
+            (pComponents.status === GameStatus.PLAYING) ?
+                $(`#${HTML_START_PAUSE_BTN_ID}`).text('Pause') : 
+                $(`#${HTML_START_PAUSE_BTN_ID}`).text('GO!');  
+                // TODO use https://getbootstrap.com/docs/5.1/components/buttons/#toggle-states
+            break;
+
+        default: 
+            throw `There is no button with the name ${pBtnID}`; 
+    }; 
+}
+
 export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: ListOfCells, 
         pLifeRound: (l: ListOfCells, d: ListOfCells) => void, 
         pComponents: GridUIComponents): void {
 
     // Start/Pause button 
-    $('#start-btn').on('click', e => { 
-        // TODO use https://getbootstrap.com/docs/5.1/components/buttons/#toggle-states
-        if ($(e.target).text() === 'GO!') {
+    $(`#${HTML_START_PAUSE_BTN_ID}`).on('click', e => { 
+        if (pComponents.status === 'PAUSED') { // Pause => Playing
             pComponents.repeat = setInterval(() => { 
                 pLifeRound(pLivingCells, pDeadCells) }, 1000);
-
-            $(e.target).text('Pause'); 
-        } else {
+            pComponents.status = GameStatus.PLAYING; 
+        } else { // Playing => Pause 
             if (pComponents.repeat) {
                 clearInterval(pComponents.repeat);     
                 pComponents.repeat = undefined; 
             }
-            
-            $(e.target).text('GO!'); 
+            pComponents.status = GameStatus.PAUSED; 
         }
+
+        updateBtnState(HTML_START_PAUSE_BTN_ID, pComponents); 
     });
 
     // Export btn 
@@ -63,14 +83,15 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: Li
 }
 
 export function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
-    let tableBody: JQuery<HTMLElement> = $(`#${HTML_GRID_BODY_ID}`); 
+    // Updating the GRID 
+    const kTableBody: JQuery<HTMLElement> = $(`#${HTML_GRID_BODY_ID}`); 
 
     const kNbRows:number = 30; 
     const kShiftY: number = Math.floor(kNbRows / 2); 
     const kNbColumns:number = 30; 
     const kShiftX:number = Math.floor(kNbColumns / 2); 
 
-    tableBody.html(''); 
+    kTableBody.html(''); 
 
     for (let i:number = 0; i < kNbRows; i++) {
         let tr: string = '<tr data-row="' + (i - kShiftY) + '">';
@@ -81,6 +102,9 @@ export function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void
                     ? `class="${CSS_LIVE_CELL_CLASS_NAME}"` : '') 
                 + ' ></td>'; 
         }
-        tableBody.append(tr + '</tr>'); 
+        kTableBody.append(tr + '</tr>'); 
     }
+
+    // Updating the button states 
+
 }

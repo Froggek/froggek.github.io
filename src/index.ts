@@ -4,7 +4,7 @@ import 'bootstrap';
 
 import { ListOfCells } from './js/cellUtils';
 import { applyLifeRules } from './js/cellRules';  
-import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents } from './js/gridUI';
+import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus } from './js/gridUI';
 
 // CSS 
 import './css/main.css'; 
@@ -48,7 +48,7 @@ liveCells.set('3,3', true);
 */
 
 
-let UIComponents: GridUIComponents = {}; 
+let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
 
 /** HERE WE GO! */
 updateUI(liveCells, deadCells); 
