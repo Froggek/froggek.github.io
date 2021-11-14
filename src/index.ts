@@ -4,9 +4,7 @@ import 'bootstrap';
 
 import { ListOfCells } from './js/cellUtils';
 import { applyLifeRules } from './js/cellRules';  
-import { clickOnGridListener, clickOnStartListener, updateUI, GridUIComponents } from './js/gridUI';
-
-
+import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents } from './js/gridUI';
 
 // CSS 
 import './css/main.css'; 
@@ -55,6 +53,6 @@ let UIComponents: GridUIComponents = {};
 /** HERE WE GO! */
 updateUI(liveCells, deadCells); 
 
-clickOnGridListener(liveCells, document);
-clickOnStartListener(liveCells, deadCells, lifeRound, UIComponents);  
+addGridListeners(liveCells, document);
+addGridButtonListeners(liveCells, deadCells, lifeRound, UIComponents);  
 

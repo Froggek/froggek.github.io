@@ -1,12 +1,12 @@
 import $ from 'jquery'; 
 
-import { ListOfCells, getCoordinatesFromInt } from './cellUtils'; 
+import { ListOfCells, getCoordinatesFromInt, serializeSituation2JSON } from './cellUtils'; 
 
 export interface GridUIComponents {
     repeat?: NodeJS.Timer; 
 }; 
 
-export function clickOnGridListener(pLivingCells: ListOfCells, pDocument: Document): void {
+export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document): void {
     $(pDocument).on('click', event => {
         // TODO: check whether the user clicks on the grid 
         $(event.target).toggleClass('dead-cell');
@@ -17,13 +17,17 @@ export function clickOnGridListener(pLivingCells: ListOfCells, pDocument: Docume
     });     
 }
 
-export function clickOnStartListener(pLivingCells: ListOfCells, pDeadCells: ListOfCells, 
+export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: ListOfCells, 
         pLifeRound: (l: ListOfCells, d: ListOfCells) => void, 
         pComponents: GridUIComponents): void {
 
+    // Start/Pause button 
     $('#start-btn').on('click', e => { 
+        // TODO use https://getbootstrap.com/docs/5.1/components/buttons/#toggle-states
+        $("#debug").append(serializeSituation2JSON(pLivingCells) + '<br/><br/>');
         if ($(e.target).text() === 'GO!') {
             pComponents.repeat = setInterval(() => { 
+                $("#debug").append(serializeSituation2JSON(pLivingCells) + '<br/><br/>');
                 pLifeRound(pLivingCells, pDeadCells) }, 1000);
 
             $(e.target).text('Pause'); 
@@ -36,6 +40,14 @@ export function clickOnStartListener(pLivingCells: ListOfCells, pDeadCells: List
             $(e.target).text('GO!'); 
         }
     });
+
+    // Export btn 
+    $('#export-btn').on('click', e => {
+        // TODO: check it's paused 
+        alert(serializeSituation2JSON(pLivingCells)); 
+    }); 
+
+
 }
 
 export function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {

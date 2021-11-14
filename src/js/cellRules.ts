@@ -1,5 +1,9 @@
 import { CellCoordinates, ListOfCells, getIntCoordinates } from './cellUtils'; 
 
+// TODO: to be removed 
+import { serializeSituation2JSON } from './cellUtils'; 
+import $ from 'jquery'; 
+
 function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
     let result: Array<CellCoordinates> = new Array() ;
 
@@ -38,6 +42,7 @@ function getDeadNeighbors(coords: CellCoordinates, livingCells: ListOfCells): Ce
 */
 export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
     // Processing live cells
+    $("#debug").append(serializeSituation2JSON(pLiveCells) + '<br/>');
     pLiveCells.forEach((v, k) => {
         const deadNeighbors: CellCoordinates[] = getDeadNeighbors(k, pLiveCells); 
         
@@ -51,22 +56,32 @@ export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells)
             (deadCellCoords: CellCoordinates) => { pDeadCells.set(deadCellCoords, false) });
     }); 
 
+    $("#debug").append(serializeSituation2JSON(pLiveCells) + '<br/>');
+
     // Processing dead cells
     pDeadCells.forEach((v, k) => {
         if (getNbOfLivingNeighbors(k, pLiveCells) === 3)
             pDeadCells.set(k, true); 
     }); 
 
+    $("#debug").append(serializeSituation2JSON(pLiveCells) + '<br/>');
+    
     // Moving and cleansing 
     pDeadCells.forEach((v, k) => {
         if (v)
             pLiveCells.set(k, true); 
     }); 
 
+    $("#debug").append(serializeSituation2JSON(pLiveCells) + '<br/>');
+
     pDeadCells.clear(); // = new Map(); 
+
+    $("#debug").append(serializeSituation2JSON(pLiveCells) + '<br/>');
 
     for (const [k, v] of pLiveCells) {
         if (! v)
             pLiveCells.delete(k); 
     }
+
+    $("#debug").append(serializeSituation2JSON(pLiveCells) + '<br/><br/>');
 }
