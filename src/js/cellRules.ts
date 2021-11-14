@@ -56,7 +56,7 @@ export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells)
         if (getNbOfLivingNeighbors(k, pLiveCells) === 3)
             pDeadCells.set(k, true); 
     }); 
-
+    
     // Moving and cleansing 
     pDeadCells.forEach((v, k) => {
         if (v)

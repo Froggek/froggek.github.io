@@ -13,7 +13,7 @@
     border: 1px solid black; 
 }
 
-#game-grid .dead-cell {
+#game-grid .live-cell {
     background-color: black;
 }
 

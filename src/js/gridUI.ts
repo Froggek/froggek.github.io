@@ -1,62 +1,113 @@
 import $ from 'jquery'; 
 
-import { ListOfCells, getCoordinatesFromInt } from './cellUtils'; 
+import { ListOfCells, getStrCoordinates, serializeSituation2JSON } from './cellUtils'; 
+
+const HTML_GRID_BODY_ID:string = 'game-grid-body'; 
+const HTML_EXPORT_AREA_ID:string = 'export-area'; 
+const HTML_START_PAUSE_BTN_ID: string = 'start-btn'; 
+
+const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell'; 
+
+export enum GameStatus {
+    PLAYING = "PLAYING", 
+    PAUSED = "PAUSED"
+}; 
 
 export interface GridUIComponents {
+    status: GameStatus; 
     repeat?: NodeJS.Timer; 
 }; 
 
-export function clickOnGridListener(pLivingCells: ListOfCells, pDocument: Document): void {
+export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document): void {
     $(pDocument).on('click', event => {
-        // TODO: check whether the user clicks on the grid 
-        $(event.target).toggleClass('dead-cell');
-    
-        pLivingCells.set($(event.target).data('col') 
-                            + ',' 
-                            + $(event.target).parent().data('row'), true); 
+        const kHtmlElt: JQuery<Document> = $(event.target); 
+
+        // Has the user clicked on the grid?  
+        if (kHtmlElt.is(`#${HTML_GRID_BODY_ID} *`)) {
+
+            // Is the cell dead or alive?
+            const kStrCoords:string = getStrCoordinates( /* x= */ kHtmlElt.data('col'), /* y= */ kHtmlElt.parent().data('row') ); 
+
+            if (pLivingCells.has(kStrCoords)) { // Alive => Dead 
+                pLivingCells.delete(kStrCoords); 
+                kHtmlElt.removeClass(CSS_LIVE_CELL_CLASS_NAME);  
+            } else { // Dead => Alive
+                pLivingCells.set(kStrCoords, true);
+                kHtmlElt.addClass(CSS_LIVE_CELL_CLASS_NAME); 
+            }
+        } 
     });     
 }
 
-export function clickOnStartListener(pLivingCells: ListOfCells, pDeadCells: ListOfCells, 
+function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
+    switch (pBtnID) {
+        case HTML_START_PAUSE_BTN_ID: 
+            (pComponents.status === GameStatus.PLAYING) ?
+                $(`#${HTML_START_PAUSE_BTN_ID}`).text('Pause') : 
+                $(`#${HTML_START_PAUSE_BTN_ID}`).text('GO!');  
+                // TODO use https://getbootstrap.com/docs/5.1/components/buttons/#toggle-states
+            break;
+
+        default: 
+            throw `There is no button with the name ${pBtnID}`; 
+    }; 
+}
+
+export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: ListOfCells, 
         pLifeRound: (l: ListOfCells, d: ListOfCells) => void, 
         pComponents: GridUIComponents): void {
 
-    $('#start-btn').on('click', e => { 
-        if ($(e.target).text() === 'GO!') {
+    // Start/Pause button 
+    $(`#${HTML_START_PAUSE_BTN_ID}`).on('click', e => { 
+        if (pComponents.status === 'PAUSED') { // Pause => Playing
             pComponents.repeat = setInterval(() => { 
                 pLifeRound(pLivingCells, pDeadCells) }, 1000);
-
-            $(e.target).text('Pause'); 
-        } else {
+            pComponents.status = GameStatus.PLAYING; 
+        } else { // Playing => Pause 
             if (pComponents.repeat) {
                 clearInterval(pComponents.repeat);     
                 pComponents.repeat = undefined; 
             }
-            
-            $(e.target).text('GO!'); 
+            pComponents.status = GameStatus.PAUSED; 
         }
+
+        updateBtnState(HTML_START_PAUSE_BTN_ID, pComponents); 
     });
+
+    // Export btn 
+    $('#export-btn').on('click', e => {
+        if (pComponents.status === GameStatus.PAUSED) {
+            $(`#${HTML_EXPORT_AREA_ID}`).text(serializeSituation2JSON(pLivingCells)); 
+        } else 
+            alert('Cannot export while the game is running'); 
+    }); 
+
+
 }
 
 export function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
-    let tableBody: JQuery<HTMLElement> = $('#game-grid-body'); 
+    // Updating the GRID 
+    const kTableBody: JQuery<HTMLElement> = $(`#${HTML_GRID_BODY_ID}`); 
 
-    const NB_ROWS:number = 30; 
-    const SHIFT_Y: number = Math.floor(NB_ROWS / 2); 
-    const NB_COLUMNS:number = 30; 
-    const SHIFT_X:number = Math.floor(NB_COLUMNS / 2); 
+    const kNbRows:number = 30; 
+    const kShiftY: number = Math.floor(kNbRows / 2); 
+    const kNbColumns:number = 30; 
+    const kShiftX:number = Math.floor(kNbColumns / 2); 
 
-    tableBody.html(''); 
+    kTableBody.html(''); 
 
-    for (let i:number = 0; i < NB_ROWS; i++) {
-        let tr: string = '<tr data-row="' + (i - SHIFT_Y) + '">';
+    for (let i:number = 0; i < kNbRows; i++) {
+        let tr: string = '<tr data-row="' + (i - kShiftY) + '">';
 
-        for (let j:number = 0; j < NB_COLUMNS; j++) {
-            tr += '<td data-col="' + (j - SHIFT_X) + '"' 
-                + (pLiveCells.has(getCoordinatesFromInt(j - SHIFT_X, i - SHIFT_Y)) 
-                    ? 'class="dead-cell"' : '') 
+        for (let j:number = 0; j < kNbColumns; j++) {
+            tr += '<td data-col="' + (j - kShiftX) + '"' 
+                + (pLiveCells.has(getStrCoordinates(j - kShiftX, i - kShiftY)) 
+                    ? `class="${CSS_LIVE_CELL_CLASS_NAME}"` : '') 
                 + ' ></td>'; 
         }
-        tableBody.append(tr + '</tr>'); 
+        kTableBody.append(tr + '</tr>'); 
     }
+
+    // Updating the button states 
+
 }
