@@ -13,9 +13,16 @@ module.exports = {
                 test: /\.css$/i, 
                 // Runs css-loader, then style-loader 
                 use: ["style-loader", "css-loader"], 
+            }, 
+            {
+                // https://webpack.js.org/loaders/source-map-loader/
+                test: /\.js$/,
+                enforce: "pre", 
+                use: ["source-map-loader"]
             }
         ]
     },
 
-    mode: "development"
+    mode: "development", 
+    devtool: "source-map" 
 }; 
