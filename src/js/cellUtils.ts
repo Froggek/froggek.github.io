@@ -4,8 +4,10 @@ export type ListOfCells = Map<CellCoordinates, boolean>; // "x,y" => isAlive?
 type ListOfCoordinates = Array<Array<number>>; 
 type SituationJSON = { liveCells: ListOfCoordinates }; 
 
-export function getCoordinatesFromInt(x:number, y:number): CellCoordinates {
-    return x + ',' + y; 
+export function getStrCoordinates(x: string, y:string): CellCoordinates; 
+export function getStrCoordinates(x: number, y:number): CellCoordinates; 
+export function getStrCoordinates(x:any, y:any): CellCoordinates {
+    return x.toString() + ',' + y.toString(); 
 } 
 
 export function getIntCoordinates(coordinates: CellCoordinates): {x:number, y:number} {
