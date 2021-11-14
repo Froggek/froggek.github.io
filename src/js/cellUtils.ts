@@ -6,8 +6,19 @@ type SituationJSON = { liveCells: ListOfCoordinates };
 
 export function getStrCoordinates(x: string, y:string): CellCoordinates; 
 export function getStrCoordinates(x: number, y:number): CellCoordinates; 
-export function getStrCoordinates(x:any, y:any): CellCoordinates {
-    return x.toString() + ',' + y.toString(); 
+export function getStrCoordinates(coords: any[]): CellCoordinates; 
+export function getStrCoordinates(x:any, y?:any): CellCoordinates {
+    let xStr, yStr: string;
+
+    if (x && Array.isArray(x)){ // Caution, we assume x.length === 2 
+        xStr = x[0].toString(); 
+        yStr = x[1].toString(); 
+    } else {
+        xStr = x.toString();
+        yStr = y.toString();  
+    }
+
+    return xStr + ',' + yStr; 
 } 
 
 export function getIntCoordinates(coordinates: CellCoordinates): {x:number, y:number} {
@@ -31,3 +42,15 @@ export function serializeSituation2JSON(cells: ListOfCells): string {
     
     return JSON.stringify(result); 
 } 
+
+export function hydrateSituationFromJSON(pRawSituation: string, pCells: ListOfCells): void {
+    const kObj:any = JSON.parse(pRawSituation);
+    
+    if (! (kObj as SituationJSON).liveCells)
+        throw 'The given input cannot be interpreted as a game situation'; 
+    
+    pCells.clear(); 
+
+    (kObj as SituationJSON).liveCells.forEach(
+        coords => pCells.set( getStrCoordinates(coords), true )); 
+}

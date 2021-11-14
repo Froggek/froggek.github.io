@@ -2,10 +2,11 @@ import $ from 'jquery';
 
 import { ListOfCells, getStrCoordinates, serializeSituation2JSON } from './cellUtils'; 
 
-export const HTML_GRID_BODY_ID:string = 'game-grid-body'; 
-export const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell'; 
-
+const HTML_GRID_BODY_ID:string = 'game-grid-body'; 
+const HTML_EXPORT_AREA_ID:string = 'export-area'; 
 const HTML_START_PAUSE_BTN_ID: string = 'start-btn'; 
+
+const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell'; 
 
 export enum GameStatus {
     PLAYING = "PLAYING", 
@@ -75,8 +76,10 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: Li
 
     // Export btn 
     $('#export-btn').on('click', e => {
-        // TODO: check it's paused 
-        alert(serializeSituation2JSON(pLivingCells)); 
+        if (pComponents.status === GameStatus.PAUSED) {
+            $(`#${HTML_EXPORT_AREA_ID}`).text(serializeSituation2JSON(pLivingCells)); 
+        } else 
+            alert('Cannot export while the game is running'); 
     }); 
 
 
