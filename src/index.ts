@@ -2,7 +2,7 @@
 // import $ from 'jquery'; // No need of JQuery here! 
 import 'bootstrap';  
 
-import { ListOfCells, hydrateSituationFromJSON } from './js/cellUtils';
+import { ListOfCells } from './js/cellUtils';
 import { applyLifeRules } from './js/cellRules';  
 import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus } from './js/gridUI';
 
@@ -16,8 +16,8 @@ function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
 }
 
 // Initialization 
-let liveCells:ListOfCells = new Map();
-let deadCells: ListOfCells = new Map();
+let liveCells:ListOfCells = new ListOfCells();
+let deadCells: ListOfCells = new ListOfCells();
 
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
 

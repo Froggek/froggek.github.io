@@ -1,9 +1,9 @@
-import { CellCoordinates, ListOfCells, getIntCoordinates } from './cellUtils'; 
+import { CellCoordinates, ListOfCells } from './cellUtils'; 
 
 function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
     let result: Array<CellCoordinates> = new Array() ;
 
-    const cellIntCoords = getIntCoordinates(coords); 
+    const cellIntCoords = ListOfCells.getIntCoordinates(coords); 
 
     for (let x:number = -1; x <= 1; x++) {
         for (let y:number = -1; y <= 1; y++ ) {
@@ -38,7 +38,7 @@ function getDeadNeighbors(coords: CellCoordinates, livingCells: ListOfCells): Ce
 */
 export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
     // Processing live cells
-    pLiveCells.forEach((v, k) => {
+    pLiveCells.processCells((v, k) => {
         const deadNeighbors: CellCoordinates[] = getDeadNeighbors(k, pLiveCells); 
         
         // Live cells in under/overpopulation die 
@@ -52,21 +52,18 @@ export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells)
     }); 
 
     // Processing dead cells
-    pDeadCells.forEach((v, k) => {
+    pDeadCells.processCells((v, k) => {
         if (getNbOfLivingNeighbors(k, pLiveCells) === 3)
             pDeadCells.set(k, true); 
     }); 
     
     // Moving and cleansing 
-    pDeadCells.forEach((v, k) => {
+    pDeadCells.processCells((v, k) => {
         if (v)
             pLiveCells.set(k, true); 
     }); 
 
     pDeadCells.clear(); // = new Map(); 
 
-    for (const [k, v] of pLiveCells) {
-        if (! v)
-            pLiveCells.delete(k); 
-    }
+    pLiveCells.removeCells(false); 
 }
