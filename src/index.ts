@@ -9,7 +9,6 @@ import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, G
 // CSS 
 import './css/main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
-import { SituationMemory } from './js/cycles';
 
 function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
     applyLifeRules(pLiveCells, pDeadCells); 
