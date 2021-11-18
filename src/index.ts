@@ -9,14 +9,16 @@ import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, G
 // CSS 
 import './css/main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
+import { SituationMemory } from './js/cycles';
 
 function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
     applyLifeRules(pLiveCells, pDeadCells); 
     updateUI(pLiveCells, pDeadCells); 
 }
 
+//TODO: have a proper object 
 // Initialization 
-let liveCells:ListOfCells = new ListOfCells();
+let liveCells: ListOfCells = new ListOfCells();
 let deadCells: ListOfCells = new ListOfCells();
 
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 

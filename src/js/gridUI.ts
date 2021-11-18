@@ -53,6 +53,10 @@ function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
     }; 
 }
 
+import { SituationMemory } from './cycles';
+
+let tmpSituation: SituationMemory = new SituationMemory(); 
+
 export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: ListOfCells, 
         pLifeRound: (l: ListOfCells, d: ListOfCells) => void, 
         pComponents: GridUIComponents): void {
@@ -61,7 +65,14 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: Li
     $(`#${HTML_START_PAUSE_BTN_ID}`).on('click', e => { 
         if (pComponents.status === 'PAUSED') { // Pause => Playing
             pComponents.repeat = setInterval(() => { 
-                pLifeRound(pLivingCells, pDeadCells) }, 1000);
+                pLifeRound(pLivingCells, pDeadCells) 
+
+                tmpSituation.addSituation(pLivingCells);
+                if (tmpSituation.isLastSituationInCycle())
+                    alert('cycle!'); 
+
+            }, 1000);
+
             pComponents.status = GameStatus.PLAYING; 
         } else { // Playing => Pause 
             if (pComponents.repeat) {

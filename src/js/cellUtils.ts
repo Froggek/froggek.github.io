@@ -1,5 +1,8 @@
 export type CellCoordinates = string; 
 
+type ListOfCoordinates = Array<Array<number>>; 
+type SituationJSON = { liveCells: ListOfCoordinates }; 
+
 export class ListOfCells  {
     private _list: Map<CellCoordinates, boolean> = new Map(); // "x,y" => isAlive?
 
@@ -36,7 +39,22 @@ export class ListOfCells  {
         }); 
 
         return pOut; 
-    }     
+    }
+    
+    // TODO: needs UTs
+    public isEqualTo(pRHS: ListOfCells):boolean {
+        if (this._list.size !== pRHS._list.size)
+            return false; 
+
+        
+        for (const [k, v] of this._list) {
+            if (! (pRHS.has(k) 
+                    && (v === pRHS._list.get(k))))
+                return false; 
+        }
+        
+        return true; 
+    }
 
 
     /** JSON serialization */
@@ -74,9 +92,6 @@ export class ListOfCells  {
             coords => this.set( getStrCoordinates(coords), true )); 
     }
 }; 
-
-type ListOfCoordinates = Array<Array<number>>; 
-type SituationJSON = { liveCells: ListOfCoordinates }; 
 
 export function getStrCoordinates(x: string, y:string): CellCoordinates; 
 export function getStrCoordinates(x: number, y:number): CellCoordinates; 
