@@ -1,9 +1,11 @@
 import $ from 'jquery'; 
 
 import { ListOfCells, getStrCoordinates } from './cellUtils'; 
+import { SituationMemory } from './cycles';
 
 const HTML_GRID_BODY_ID:string = 'game-grid-body'; 
 const HTML_EXPORT_AREA_ID:string = 'export-area'; 
+const HTML_CYCLES_AREA_ID: string ='cycles-panel-content'; 
 const HTML_START_PAUSE_BTN_ID: string = 'start-btn'; 
 
 const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell'; 
@@ -53,12 +55,10 @@ function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
     }; 
 }
 
-import { SituationMemory } from './cycles';
 
-let tmpSituation: SituationMemory = new SituationMemory(); 
-
-export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: ListOfCells, 
+export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: ListOfCells, pSituationHistory: SituationMemory, 
         pLifeRound: (l: ListOfCells, d: ListOfCells) => void, 
+        pCycleDetection: (l: ListOfCells, h: SituationMemory) => void, 
         pComponents: GridUIComponents): void {
 
     // Start/Pause button 
@@ -66,11 +66,7 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: Li
         if (pComponents.status === 'PAUSED') { // Pause => Playing
             pComponents.repeat = setInterval(() => { 
                 pLifeRound(pLivingCells, pDeadCells) 
-
-                tmpSituation.addSituation(pLivingCells);
-                if (tmpSituation.isLastSituationInCycle())
-                    alert('cycle!'); 
-
+                pCycleDetection(pLivingCells, pSituationHistory); 
             }, 1000);
 
             pComponents.status = GameStatus.PLAYING; 
@@ -120,5 +116,21 @@ export function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void
     }
 
     // Updating the button states 
+}
 
+export function displayCycles(pSituations: SituationMemory): void {
+    if (pSituations.hasCycles()) {
+        let wListOfCycles: string = ''; 
+
+        pSituations.processCycles(
+            (pLength: number) => { 
+                wListOfCycles += '<li>Length: ' + pLength.toString() + '</li>'; 
+            })
+
+        $(`#${HTML_CYCLES_AREA_ID}`).html(
+            '<ul>' +    
+                wListOfCycles + 
+            '</ul>'
+        ); 
+    }
 }

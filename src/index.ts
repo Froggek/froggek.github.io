@@ -4,27 +4,38 @@ import 'bootstrap';
 
 import { ListOfCells } from './js/cellUtils';
 import { applyLifeRules } from './js/cellRules';  
-import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus } from './js/gridUI';
+import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus, displayCycles } from './js/gridUI';
 
 // CSS 
 import './css/main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
+import { SituationMemory } from './js/cycles';
 
 function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
     applyLifeRules(pLiveCells, pDeadCells); 
     updateUI(pLiveCells, pDeadCells); 
 }
 
+function cycleDetection(pLiveCells: ListOfCells, pSituationHistory: SituationMemory): void {
+    pSituationHistory.addSituation(pLiveCells);
+    pSituationHistory.searchForCycles(); 
+    displayCycles(pSituationHistory); 
+}
+
 //TODO: have a proper object 
 // Initialization 
 let liveCells: ListOfCells = new ListOfCells();
 let deadCells: ListOfCells = new ListOfCells();
+let situationHistory: SituationMemory = new SituationMemory(); 
 
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
+
 
 /** HERE WE GO! */
 updateUI(liveCells, deadCells); 
 
 addGridListeners(liveCells, document);
-addGridButtonListeners(liveCells, deadCells, lifeRound, UIComponents);  
+addGridButtonListeners(liveCells, deadCells, situationHistory, 
+    lifeRound, cycleDetection, 
+    UIComponents);  
 
