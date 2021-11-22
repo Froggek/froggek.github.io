@@ -114,8 +114,6 @@ export function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void
         }
         kTableBody.append(tr + '</tr>'); 
     }
-
-    // Updating the button states 
 }
 
 export function displayCycles(pSituations: SituationMemory): void {

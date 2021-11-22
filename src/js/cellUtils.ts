@@ -3,15 +3,52 @@ export type CellCoordinates = string;
 type ListOfCoordinates = Array<Array<number>>; 
 type SituationJSON = { liveCells: ListOfCoordinates }; 
 
+class CellState { 
+    private _isAlive: boolean ; 
+    private _groupId:number;
+    
+
+    constructor(pIsAlive: boolean); 
+    constructor(pIsAlive: boolean, pGroupId?: number); 
+    constructor(pIsAlive:boolean, pGroupId?:number){
+        this._isAlive = pIsAlive; 
+        this._groupId = (pGroupId ? pGroupId : -1); 
+    }
+
+    public deepCopy(): CellState {
+        return new CellState(this._isAlive, this._groupId); 
+    }
+
+    public isAlive(): boolean {
+        return this._isAlive; 
+    }
+    public groupId(): number {
+        return this._groupId; 
+    } 
+
+    public isEqualTo(pRHS: CellState): boolean {
+        return (this.isAlive() === pRHS.isAlive()) 
+            && (this.groupId() === pRHS.groupId()); 
+    }
+};
+
 export class ListOfCells  {
-    private _list: Map<CellCoordinates, boolean> = new Map(); // "x,y" => isAlive?
+     
+    private _list: Map<CellCoordinates, CellState> = new Map(); // "x,y" => isAlive?
 
 
     public has(pCoords: CellCoordinates): boolean {
         return this._list.has(pCoords); 
     }
-    public set(pCoords: CellCoordinates, pIsAlive: boolean): void {
-        this._list.set(pCoords, pIsAlive); 
+    public set(pCoords: CellCoordinates, pState: CellState): void; 
+    public set(pCoords: CellCoordinates, pIsAlive: boolean, pGroupId?: number): void; 
+    public set(pCoords: CellCoordinates, pStateOrIsAlive: CellState | boolean, pGroupId?: number): void {
+        if (pStateOrIsAlive instanceof CellState)
+            this._list.set(pCoords, pStateOrIsAlive); 
+        else         
+            this._list.set(pCoords, new CellState(pStateOrIsAlive, pGroupId)); 
+        /* else // Should NOT happen
+            throw "Cannot set such coordinates: " + pStateOrIsAlive.toString() + " / " + pGroupId?.toString(); */ 
     }
     public delete(pCoords: CellCoordinates): boolean {
         return this._list.delete(pCoords); 
@@ -20,13 +57,13 @@ export class ListOfCells  {
         return this._list.clear(); 
     }
 
-    public processCells(pCallBack: (pValue:boolean, pKey: CellCoordinates) => void): void {
+    public processCells(pCallBack: (pValue: CellState, pKey: CellCoordinates) => void): void {
         return this._list.forEach(pCallBack); 
     }
 
     public removeCells(pRemoveIfAlive: boolean): void {
         for (const [k, v] of this._list) {
-            if (v === pRemoveIfAlive)
+            if (v.isAlive() === pRemoveIfAlive)
                 this._list.delete(k); 
         }
     }
@@ -34,8 +71,8 @@ export class ListOfCells  {
     public deepCopy(): ListOfCells {
         let pOut:ListOfCells = new ListOfCells();
         
-        this._list.forEach((v,k) => {
-            pOut.set(k, v); 
+        this._list.forEach((v: CellState, k: CellCoordinates) => {
+            pOut.set(k, v.deepCopy()); 
         }); 
 
         return pOut; 
@@ -48,8 +85,8 @@ export class ListOfCells  {
 
         
         for (const [k, v] of this._list) {
-            if (! (pRHS.has(k) 
-                    && (v === pRHS._list.get(k))))
+            if (! (pRHS.has(k)
+                    && (pRHS._list.get(k)?.isEqualTo(v))))
                 return false; 
         }
         
@@ -89,6 +126,7 @@ export class ListOfCells  {
         this.clear(); 
 
         (kObj as SituationJSON).liveCells.forEach(
+            // TODO: do we want to serialize the groups? 
             coords => this.set( getStrCoordinates(coords), true )); 
     }
 }; 

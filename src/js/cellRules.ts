@@ -38,7 +38,7 @@ function getDeadNeighbors(coords: CellCoordinates, livingCells: ListOfCells): Ce
 */
 export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
     // Processing live cells
-    pLiveCells.processCells((v, k) => {
+    pLiveCells.processCells((_, k) => {
         const deadNeighbors: CellCoordinates[] = getDeadNeighbors(k, pLiveCells); 
         
         // Live cells in under/overpopulation die 
@@ -52,14 +52,14 @@ export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells)
     }); 
 
     // Processing dead cells
-    pDeadCells.processCells((v, k) => {
+    pDeadCells.processCells((_, k) => {
         if (getNbOfLivingNeighbors(k, pLiveCells) === 3)
             pDeadCells.set(k, true); 
     }); 
     
     // Moving and cleansing 
     pDeadCells.processCells((v, k) => {
-        if (v)
+        if (v.isAlive())
             pLiveCells.set(k, true); 
     }); 
 
