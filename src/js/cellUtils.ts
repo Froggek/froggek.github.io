@@ -7,6 +7,11 @@ class CellState {
     private _isAlive: boolean ; 
     private _groupId:number;
     
+    private static _maxGroupId: number = -1; 
+
+    public static maxGroupId(): number {
+        return this._maxGroupId; 
+    }
 
     constructor(pIsAlive: boolean); 
     constructor(pIsAlive: boolean, pGroupId?: number); 
@@ -25,10 +30,22 @@ class CellState {
     public groupId(): number {
         return this._groupId; 
     } 
-
+    public hasGroup(): boolean {
+        return this._groupId >= 0; 
+    }
     public isEqualTo(pRHS: CellState): boolean {
         return (this.isAlive() === pRHS.isAlive()) 
             && (this.groupId() === pRHS.groupId()); 
+    }
+
+    public setGroupId(pGroupId: number): number {
+        CellState._maxGroupId = Math.max(CellState._maxGroupId, pGroupId);  
+        this._groupId = pGroupId; 
+
+        return this._groupId; 
+    }
+    public setNewGroupId(): number {
+        return this.setGroupId(CellState._maxGroupId + 1); 
     }
 };
 
@@ -47,8 +64,6 @@ export class ListOfCells  {
             this._list.set(pCoords, pStateOrIsAlive); 
         else         
             this._list.set(pCoords, new CellState(pStateOrIsAlive, pGroupId)); 
-        /* else // Should NOT happen
-            throw "Cannot set such coordinates: " + pStateOrIsAlive.toString() + " / " + pGroupId?.toString(); */ 
     }
     public delete(pCoords: CellCoordinates): boolean {
         return this._list.delete(pCoords); 
@@ -128,6 +143,23 @@ export class ListOfCells  {
         (kObj as SituationJSON).liveCells.forEach(
             // TODO: do we want to serialize the groups? 
             coords => this.set( getStrCoordinates(coords), true )); 
+    }
+
+    public harmonizeGroup(pCellsToHarmonize: CellCoordinates[], pSingleGroupId: number): void {
+        pCellsToHarmonize.forEach((pCoords: CellCoordinates) => {
+            if (! this.has(pCoords)) 
+                return; 
+            
+            const kPreviousGroupId = this._list.get(pCoords)?.groupId(); 
+
+            if (kPreviousGroupId !== pSingleGroupId) {
+                // We need to change the neighbor's group ID ... and all its neighbors'! 
+                this._list.forEach( (k: CellState) => { 
+                    if (k.groupId() === kPreviousGroupId)
+                        k.setGroupId(pSingleGroupId); 
+                 }); 
+            }
+        }); 
     }
 }; 
 

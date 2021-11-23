@@ -16,15 +16,14 @@ function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates>
     return result; 
 }
 
-function getNbOfLivingNeighbors(coords: CellCoordinates, livingCells: ListOfCells): number {
+function getLivingNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
     const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
 
     return neighborCoords
-            .filter((neighbor: CellCoordinates) => { return livingCells.has(neighbor) })
-            .length; 
+            .filter((neighbor: CellCoordinates) => { return livingCells.has(neighbor) }); 
 }
 
-function getDeadNeighbors(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
+function getDeadNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
     const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
     
     return neighborCoords.filter((neighbor: CellCoordinates) => { return ! livingCells.has(neighbor) }); 
@@ -39,7 +38,7 @@ function getDeadNeighbors(coords: CellCoordinates, livingCells: ListOfCells): Ce
 export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
     // Processing live cells
     pLiveCells.processCells((_, k) => {
-        const deadNeighbors: CellCoordinates[] = getDeadNeighbors(k, pLiveCells); 
+        const deadNeighbors: CellCoordinates[] = getDeadNeighborCoords(k, pLiveCells); 
         
         // Live cells in under/overpopulation die 
         const nbOfLivingNeighbors: number = 8 - deadNeighbors.length; 
@@ -51,10 +50,16 @@ export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells)
             (deadCellCoords: CellCoordinates) => { pDeadCells.set(deadCellCoords, false) });
     }); 
 
-    // Processing dead cells
+    // Dead cell with 3 neighbors revive 
     pDeadCells.processCells((_, k) => {
-        if (getNbOfLivingNeighbors(k, pLiveCells) === 3)
-            pDeadCells.set(k, true); 
+        let livingNeighbors: CellCoordinates[] = getLivingNeighborCoords(k, pLiveCells);
+        
+        if (livingNeighbors.length === 3) {
+            pDeadCells.set(k, 
+                true, // cell resurrects 
+                -1 );  // group ID 
+            
+        }
     }); 
     
     // Moving and cleansing 
