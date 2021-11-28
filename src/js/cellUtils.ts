@@ -1,13 +1,19 @@
 export type CellCoordinates = string; 
 
-type ListOfCoordinates = Array<Array<number>>; 
+type ListOfCoordinates = Array< 
+                            { 
+                                x:number, y:number, 
+                                groupID: number 
+                            } 
+                        >; 
 type SituationJSON = { liveCells: ListOfCoordinates }; 
 
 class CellState { 
     private _isAlive: boolean ; 
     private _groupId:number;
     
-    private static _maxGroupId: number = -1; 
+    private static readonly DEFAULT_GROUP_ID: number = -1; 
+    private static _maxGroupId: number = CellState.DEFAULT_GROUP_ID; 
 
     public static maxGroupId(): number {
         return this._maxGroupId; 
@@ -17,7 +23,7 @@ class CellState {
     constructor(pIsAlive: boolean, pGroupId?: number); 
     constructor(pIsAlive:boolean, pGroupId?:number){
         this._isAlive = pIsAlive; 
-        this._groupId = (pGroupId ? pGroupId : -1); 
+        this._groupId = (pGroupId ? pGroupId : CellState.DEFAULT_GROUP_ID); 
     }
 
     public deepCopy(): CellState {
@@ -31,8 +37,15 @@ class CellState {
         return this._groupId; 
     } 
     public hasGroup(): boolean {
-        return this._groupId >= 0; 
+        return this._groupId > CellState.DEFAULT_GROUP_ID; 
     }
+    public clearGroup(): void {
+        this._groupId =  CellState.DEFAULT_GROUP_ID; 
+    }
+    public static resetGroups(): void {
+        CellState._maxGroupId = CellState.DEFAULT_GROUP_ID; 
+    }
+
     public isEqualTo(pRHS: CellState): boolean {
         return (this.isAlive() === pRHS.isAlive()) 
             && (this.groupId() === pRHS.groupId()); 
@@ -49,13 +62,53 @@ class CellState {
     }
 };
 
+function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
+    let result: Array<CellCoordinates> = new Array() ;
+
+    const cellIntCoords = ListOfCells.getIntCoordinates(coords); 
+
+    for (let x:number = -1; x <= 1; x++) {
+        for (let y:number = -1; y <= 1; y++ ) {
+            // The cell itself isn't a neighbor 
+            if (! ((x === 0) && (y === 0)))
+                result.push( 
+                    getStrCoordinates(cellIntCoords.x + x, cellIntCoords.y + y) 
+                    /*(cellIntCoords.x + x) + ',' + (cellIntCoords.y + y)*/
+                    ); 
+        }
+    }
+
+    return result; 
+}
+
+export function getLivingNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
+    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
+
+    return neighborCoords
+            .filter((neighbor: CellCoordinates) => { return livingCells.has(neighbor) }); 
+}
+
+export function getDeadNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
+    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
+    
+    return neighborCoords.filter((neighbor: CellCoordinates) => { return ! livingCells.has(neighbor) }); 
+}
+
 export class ListOfCells  {
      
     private _list: Map<CellCoordinates, CellState> = new Map(); // "x,y" => isAlive?
 
+    public empty(): boolean {
+        return ! this._list.size;  
+    }
 
     public has(pCoords: CellCoordinates): boolean {
         return this._list.has(pCoords); 
+    }
+    public getGroupId(pCoords: CellCoordinates): number | undefined {
+        return this._list.get(pCoords)?.hasGroup() 
+            ? this._list.get(pCoords)?.groupId() 
+            : undefined; 
     }
     public set(pCoords: CellCoordinates, pState: CellState): void; 
     public set(pCoords: CellCoordinates, pIsAlive: boolean, pGroupId?: number): void; 
@@ -121,12 +174,13 @@ export class ListOfCells  {
     }
 
     public serializeSituation2JSON(): string {
-
         let result: SituationJSON = { liveCells: [] };  
 
-        this._list.forEach( (v, k) => {
+        this.processCells( (v, k: CellCoordinates) => {
             let { x, y } = ListOfCells.getIntCoordinates(k);  
-            result.liveCells.push([x, y]); 
+            result.liveCells.push({ 
+                x, y, 
+                groupID: v.groupId() }); 
         } ); 
         
         return JSON.stringify(result); 
@@ -142,24 +196,68 @@ export class ListOfCells  {
 
         (kObj as SituationJSON).liveCells.forEach(
             // TODO: do we want to serialize the groups? 
-            coords => this.set( getStrCoordinates(coords), true )); 
+            pCell => this.set( getStrCoordinates(pCell.x, pCell.y), true, pCell.groupID )); 
     }
 
-    public harmonizeGroup(pCellsToHarmonize: CellCoordinates[], pSingleGroupId: number): void {
-        pCellsToHarmonize.forEach((pCoords: CellCoordinates) => {
-            if (! this.has(pCoords)) 
-                return; 
-            
-            const kPreviousGroupId = this._list.get(pCoords)?.groupId(); 
+    public harmonizeGroups(pCellsToHarmonize: CellCoordinates[], pSingleGroupId: number): void {
 
-            if (kPreviousGroupId !== pSingleGroupId) {
-                // We need to change the neighbor's group ID ... and all its neighbors'! 
-                this._list.forEach( (k: CellState) => { 
-                    if (k.groupId() === kPreviousGroupId)
-                        k.setGroupId(pSingleGroupId); 
-                 }); 
+        let wGroupIdsToHarmonize: Set<number | undefined> = new Set(); 
+
+        pCellsToHarmonize.forEach( (pCoords: CellCoordinates) => {
+            wGroupIdsToHarmonize.add(this._list.get(pCoords)?.groupId()); 
+        }); 
+
+        this._list.forEach( (k: CellState) => { 
+            if ( wGroupIdsToHarmonize.has( k.groupId() ) )
+                k.setGroupId(pSingleGroupId); 
+         });
+    }
+
+    /** 
+     * Removes any existing group from teh cells, 
+     * and resets the group IS counter 
+    */
+   public clearGroups(): void {
+        this.processCells(
+            (pState: CellState, _) => { pState.clearGroup(); }); 
+        
+        CellState.resetGroups(); 
+   }
+
+    /** Gives to each set of neighbors a unique group ID  */
+    public clearAndLabelGroups(): void {
+        this.clearGroups(); 
+        let wCellsToLabel: Set<CellCoordinates> = new Set(); 
+
+        this.processCells( (pState, pCoords) => {
+            // We only process cells which DON'T already have a group
+            if (! pState.hasGroup()) {
+                // Let's label the cell 
+                pState.setNewGroupId(); 
+                wCellsToLabel.add(pCoords);
+            }
+            
+            // Let's build this new group 
+            while(wCellsToLabel.size) {
+                const wCoords: CellCoordinates = wCellsToLabel.values().next().value; 
+
+                getNeighborCoordinates(wCoords)
+                    .filter( 
+                        (pNeighborCoords) => { // Has the neighbor already been labeled? 
+                            let wNeighbour: CellState | undefined = this._list.get(pNeighborCoords);  
+                            return wNeighbour && (! wNeighbour.hasGroup()); 
+                        })
+                    .forEach(
+                        (pNeighborCoords) =>  { 
+                            this._list.get(pNeighborCoords)!.setGroupId(pState.groupId()); 
+                            wCellsToLabel.add(pNeighborCoords);  
+                        }
+                    ); 
+
+                wCellsToLabel.delete(wCoords); 
             }
         }); 
+
     }
 }; 
 

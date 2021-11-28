@@ -1,33 +1,4 @@
-import { CellCoordinates, ListOfCells } from './cellUtils'; 
-
-function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
-    let result: Array<CellCoordinates> = new Array() ;
-
-    const cellIntCoords = ListOfCells.getIntCoordinates(coords); 
-
-    for (let x:number = -1; x <= 1; x++) {
-        for (let y:number = -1; y <= 1; y++ ) {
-            // The cell itself isn't a neighbor 
-            if (! ((x === 0) && (y === 0)))
-                result.push((cellIntCoords.x + x) + ',' + (cellIntCoords.y + y)); 
-        }
-    }
-
-    return result; 
-}
-
-function getLivingNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
-    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
-
-    return neighborCoords
-            .filter((neighbor: CellCoordinates) => { return livingCells.has(neighbor) }); 
-}
-
-function getDeadNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
-    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
-    
-    return neighborCoords.filter((neighbor: CellCoordinates) => { return ! livingCells.has(neighbor) }); 
-}
+import { CellCoordinates, getLivingNeighborCoords, getDeadNeighborCoords, ListOfCells } from './cellUtils'; 
 
 /**  Applying rules 
  * 1-Any live cell with two or three live neighbours survives.
