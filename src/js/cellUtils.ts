@@ -62,38 +62,6 @@ class CellState {
     }
 };
 
-function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
-    let result: Array<CellCoordinates> = new Array() ;
-
-    const cellIntCoords = ListOfCells.getIntCoordinates(coords); 
-
-    for (let x:number = -1; x <= 1; x++) {
-        for (let y:number = -1; y <= 1; y++ ) {
-            // The cell itself isn't a neighbor 
-            if (! ((x === 0) && (y === 0)))
-                result.push( 
-                    getStrCoordinates(cellIntCoords.x + x, cellIntCoords.y + y) 
-                    /*(cellIntCoords.x + x) + ',' + (cellIntCoords.y + y)*/
-                    ); 
-        }
-    }
-
-    return result; 
-}
-
-export function getLivingNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
-    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
-
-    return neighborCoords
-            .filter((neighbor: CellCoordinates) => { return livingCells.has(neighbor) }); 
-}
-
-export function getDeadNeighborCoords(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
-    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
-    
-    return neighborCoords.filter((neighbor: CellCoordinates) => { return ! livingCells.has(neighbor) }); 
-}
-
 export class ListOfCells  {
      
     private _list: Map<CellCoordinates, CellState> = new Map(); // "x,y" => isAlive?
@@ -105,11 +73,9 @@ export class ListOfCells  {
     public has(pCoords: CellCoordinates): boolean {
         return this._list.has(pCoords); 
     }
-    public getGroupId(pCoords: CellCoordinates): number | undefined {
-        return this._list.get(pCoords)?.hasGroup() 
-            ? this._list.get(pCoords)?.groupId() 
-            : undefined; 
-    }
+    private getCell(pCoords: CellCoordinates): CellState | undefined {
+        return this._list.get(pCoords); 
+    }; 
     public set(pCoords: CellCoordinates, pState: CellState): void; 
     public set(pCoords: CellCoordinates, pIsAlive: boolean, pGroupId?: number): void; 
     public set(pCoords: CellCoordinates, pStateOrIsAlive: CellState | boolean, pGroupId?: number): void {
@@ -161,6 +127,50 @@ export class ListOfCells  {
         return true; 
     }
 
+    public getGroupId(pCoords: CellCoordinates): number | undefined {
+        return this._list.get(pCoords)?.hasGroup() 
+            ? this._list.get(pCoords)?.groupId() 
+            : undefined; 
+    }
+    public setGroupId(pCoords: CellCoordinates, pGroupId: number): number | undefined {
+        return this.getCell(pCoords)?.setGroupId(pGroupId); 
+    }
+    public setNewGroupId(pCoords: CellCoordinates): number | undefined {
+        return this.getCell(pCoords)?.setNewGroupId();     
+    } 
+
+    /** Various neighbors */
+    private static getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
+        let result: Array<CellCoordinates> = new Array() ;
+    
+        const cellIntCoords = ListOfCells.getIntCoordinates(coords); 
+    
+        for (let x:number = -1; x <= 1; x++) {
+            for (let y:number = -1; y <= 1; y++ ) {
+                // The cell itself isn't a neighbor 
+                if (! ((x === 0) && (y === 0)))
+                    result.push( 
+                        getStrCoordinates(cellIntCoords.x + x, cellIntCoords.y + y) 
+                        /*(cellIntCoords.x + x) + ',' + (cellIntCoords.y + y)*/
+                        ); 
+            }
+        }
+    
+        return result; 
+    }
+
+    public getLivingNeighborCoords(coords: CellCoordinates): CellCoordinates[] {
+        const neighborCoords:CellCoordinates[] = ListOfCells.getNeighborCoordinates(coords);
+    
+        return neighborCoords
+                .filter((neighbor: CellCoordinates) => { return this.has(neighbor) }); 
+    }
+    
+    public getDeadNeighborCoords(coords: CellCoordinates): CellCoordinates[] {
+        const neighborCoords:CellCoordinates[] = ListOfCells.getNeighborCoordinates(coords);
+        
+        return neighborCoords.filter((neighbor: CellCoordinates) => { return ! this.has(neighbor) }); 
+    }
 
     /** JSON serialization */
     public static getIntCoordinates(coordinates: CellCoordinates): {x:number, y:number} {
@@ -199,20 +209,6 @@ export class ListOfCells  {
             pCell => this.set( getStrCoordinates(pCell.x, pCell.y), true, pCell.groupID )); 
     }
 
-    public harmonizeGroups(pCellsToHarmonize: CellCoordinates[], pSingleGroupId: number): void {
-
-        let wGroupIdsToHarmonize: Set<number | undefined> = new Set(); 
-
-        pCellsToHarmonize.forEach( (pCoords: CellCoordinates) => {
-            wGroupIdsToHarmonize.add(this._list.get(pCoords)?.groupId()); 
-        }); 
-
-        this._list.forEach( (k: CellState) => { 
-            if ( wGroupIdsToHarmonize.has( k.groupId() ) )
-                k.setGroupId(pSingleGroupId); 
-         });
-    }
-
     /** 
      * Removes any existing group from teh cells, 
      * and resets the group IS counter 
@@ -241,7 +237,7 @@ export class ListOfCells  {
             while(wCellsToLabel.size) {
                 const wCoords: CellCoordinates = wCellsToLabel.values().next().value; 
 
-                getNeighborCoordinates(wCoords)
+                ListOfCells.getNeighborCoordinates(wCoords)
                     .filter( 
                         (pNeighborCoords) => { // Has the neighbor already been labeled? 
                             let wNeighbour: CellState | undefined = this._list.get(pNeighborCoords);  
@@ -258,6 +254,46 @@ export class ListOfCells  {
             }
         }); 
 
+    }
+
+    /** 
+     * Labels a single cell, 
+     * but also re-labels existing cells in case a merge is required 
+     * 
+     * Returns: the cell's (new) group ID, or undefined if the cell doesn't exist 
+     * 
+     * E.g.: 111_222 => 111|*|222 => 111|1|111 
+     */
+    public labelCell(pCellToLabelCoords: CellCoordinates): number | undefined {
+        const kNeighborCoords: CellCoordinates[] = this.getLivingNeighborCoords(pCellToLabelCoords); // All live neighbors  
+        
+        if (! kNeighborCoords.length)
+            return this.setNewGroupId(pCellToLabelCoords); 
+
+        // Are there different group IDs? What's the min one? 
+        let wGroupIds: Set<number> = new Set(); 
+
+        kNeighborCoords.forEach( pCoords => {
+            let wCell: CellState | undefined = this.getCell(pCoords);
+            
+            if (wCell && wCell.hasGroup()) 
+                wGroupIds.add(wCell.groupId()); 
+        });
+        
+        if (wGroupIds.size === 1) // Single group ==> easy! 
+            return this.setGroupId(pCellToLabelCoords, wGroupIds.values().next().value); 
+
+        // Otherwise, multiple groups ==> merge is required 
+        // MIN group ID is kept 
+        const kMinGroupId: number = Math.min(...wGroupIds); 
+
+        // TODO: move to another function 
+        this.processCells((pState: CellState, _: CellCoordinates) => {
+            if ( wGroupIds.has(pState.groupId()) )
+                pState.setGroupId(kMinGroupId); 
+        }); 
+        
+        return this.setGroupId(pCellToLabelCoords, kMinGroupId); 
     }
 }; 
 

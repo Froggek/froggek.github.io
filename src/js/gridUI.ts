@@ -35,6 +35,7 @@ export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document)
             if (pLivingCells.has(kStrCoords)) { // Alive => Dead
                 pLivingCells.delete(kStrCoords);
                 kHtmlElt.removeClass(CSS_LIVE_CELL_CLASS_NAME);
+                kHtmlElt.css('background-color', ''); 
             } else { // Dead => Alive
                 pLivingCells.set(kStrCoords, true);
                 kHtmlElt.addClass(CSS_LIVE_CELL_CLASS_NAME);
@@ -117,7 +118,7 @@ export function updateUI(pLiveCells: ListOfCells): void {
     const kNbColumns:number = 30;
     const kShiftX:number = Math.floor(kNbColumns / 2);
 
-    const kGroupColors = [ "black", "silver", "gray", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua" ];
+    const kGroupColors = [ /* "black", */ "silver", "gray", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua" ];
 
     kTableBody.html('');
 
@@ -134,7 +135,7 @@ export function updateUI(pLiveCells: ListOfCells): void {
                 // TODO: should be a class...
                 + ((kGroupId !== undefined) ? 'style="background-color: ' + kGroupColors[kGroupId % kGroupColors.length ] + '" ' : '')
                 + ' ></td>'
-                + '<!-- ' + kGroupId + ' -->';
+                ;
         }
         kTableBody.append(tr + '</tr>');
     }
