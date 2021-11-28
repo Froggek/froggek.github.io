@@ -7,6 +7,8 @@ const HTML_GRID_BODY_ID:string = 'game-grid-body';
 const HTML_EXPORT_AREA_ID:string = 'export-area';
 const HTML_CYCLES_AREA_ID: string ='cycles-panel-content';
 const HTML_START_PAUSE_BTN_ID: string = 'start-btn';
+const HTML_EXPORT_BTN_ID: string = 'export-btn'; 
+const HTML_LABEL_REFRESH_BTN_ID: string = 'label-and-paint-btn'; 
 
 const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell';
 
@@ -67,7 +69,7 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: Li
         if (pComponents.status === 'PAUSED') { // Pause => Playing
             if (pInitialLabelling)
                 pInitialLabelling(pLivingCells);
-                 
+
             pComponents.repeat = setInterval(() => {
                 pLifeRound(pLivingCells, pDeadCells)
                 pCycleDetection(pLivingCells, pSituationHistory);
@@ -86,17 +88,27 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: Li
     });
 
     // Export btn
-    $('#export-btn').on('click', e => {
+    $(`#${HTML_EXPORT_BTN_ID}`).on('click', e => {
         if (pComponents.status === GameStatus.PAUSED) {
             $(`#${HTML_EXPORT_AREA_ID}`).text(pLivingCells.serializeSituation2JSON());
         } else
             alert('Cannot export while the game is running');
     });
 
+    /**  DEBUG STUFFS */
+    // Label & Refresh UI
+    $(`#${HTML_LABEL_REFRESH_BTN_ID}`).on('click', e => {
+        if (pComponents.status === GameStatus.PAUSED) {
+            pLivingCells.clearAndLabelGroups(); 
+            updateUI(pLivingCells); 
+        } else
+            alert('Cannot export while the game is running');
+    });  
+
 
 }
 
-export function updateUI(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
+export function updateUI(pLiveCells: ListOfCells): void {
     // Updating the GRID
     const kTableBody: JQuery<HTMLElement> = $(`#${HTML_GRID_BODY_ID}`);
 

@@ -13,7 +13,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
     applyLifeRules(pLiveCells, pDeadCells); 
-    updateUI(pLiveCells, pDeadCells); 
+    updateUI(pLiveCells); 
 }
 
 function cycleDetection(pLiveCells: ListOfCells, pSituationHistory: SituationMemory): void {
@@ -31,7 +31,7 @@ let situationHistory: SituationMemory = new SituationMemory();
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
 
 /** HERE WE GO! */
-updateUI(liveCells, deadCells); 
+updateUI(liveCells); 
 
 addGridListeners(liveCells, document);
 addGridButtonListeners(liveCells, deadCells, situationHistory, 
