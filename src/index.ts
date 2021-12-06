@@ -11,8 +11,8 @@ import { SituationMemory } from './js/cycles';
 import './css/main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 
-function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
-    applyLifeRules(pLiveCells, pDeadCells); 
+function lifeRound(pLiveCells:ListOfCells): void {
+    applyLifeRules(pLiveCells); 
     updateUI(pLiveCells); 
 }
 
@@ -25,7 +25,6 @@ function cycleDetection(pLiveCells: ListOfCells, pSituationHistory: SituationMem
 //TODO: have a proper object 
 // Initialization 
 let liveCells: ListOfCells = new ListOfCells();
-let deadCells: ListOfCells = new ListOfCells();
 let situationHistory: SituationMemory = new SituationMemory(); 
 
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
@@ -42,7 +41,7 @@ liveCells.hydrateSituationFromJSON('{"liveCells":[{"x":-4,"y":-9,"groupID":0},{"
 updateUI(liveCells); 
 
 addGridListeners(liveCells, document);
-addGridButtonListeners(liveCells, deadCells, situationHistory, 
+addGridButtonListeners(liveCells, situationHistory, 
     lifeRound, cycleDetection, 
     /* Initial labelling=*/ (l: ListOfCells) => { l.clearAndLabelGroups() }, 
     UIComponents);  

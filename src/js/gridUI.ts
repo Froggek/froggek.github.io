@@ -59,8 +59,8 @@ function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
 }
 
 
-export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: ListOfCells, pSituationHistory: SituationMemory,
-        pLifeRound: (l: ListOfCells, d: ListOfCells) => void,
+export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHistory: SituationMemory,
+        pLifeRound: (l: ListOfCells) => void,
         pCycleDetection: (l: ListOfCells, h: SituationMemory) => void,
         pInitialLabelling: (l: ListOfCells) => void | undefined, 
         pComponents: GridUIComponents): void {
@@ -72,7 +72,7 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pDeadCells: Li
                 pInitialLabelling(pLivingCells);
 
             pComponents.repeat = setInterval(() => {
-                pLifeRound(pLivingCells, pDeadCells)
+                pLifeRound(pLivingCells); 
                 pCycleDetection(pLivingCells, pSituationHistory);
             }, 1000);
 
