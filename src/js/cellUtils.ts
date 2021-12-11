@@ -30,7 +30,8 @@ class CellState {
         return new CellState(this._isAlive, this._groupId); 
     }
 
-    public isAlive(): boolean {
+    // TODO: remove attribute 
+    private isAlive(): boolean {
         return this._isAlive; 
     }
     public groupId(): number {
@@ -95,9 +96,11 @@ export class ListOfCells  {
         return this._list.forEach(pCallBack); 
     }
 
-    public removeCells(pRemoveIfAlive: boolean): void {
+    // TODO: remove 
+    public removeCells(pWhenToRemoveCriteria: (_state: CellState) => boolean): void {
         for (const [k, v] of this._list) {
-            if (v.isAlive() === pRemoveIfAlive)
+
+            if (pWhenToRemoveCriteria(v))
                 this._list.delete(k); 
         }
     }
@@ -139,7 +142,7 @@ export class ListOfCells  {
         return this.getCell(pCoords)?.setNewGroupId();     
     } 
 
-    /** Various neighbors */
+    /** ALL the neighbors */
     private static getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
         let result: Array<CellCoordinates> = new Array() ;
     
