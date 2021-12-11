@@ -60,21 +60,28 @@ function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
 
 
 export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHistory: SituationMemory,
+        pComponents: GridUIComponents, 
         pLifeRound: (l: ListOfCells) => void,
         pCycleDetection: (l: ListOfCells, h: SituationMemory) => void,
-        pInitialLabelling: (l: ListOfCells) => void | undefined, 
-        pComponents: GridUIComponents): void {
+        pInitialLabelling? : (l: ListOfCells) => void): void {
 
     // Start/Pause button
     $(`#${HTML_START_PAUSE_BTN_ID}`).on('click', e => {
         if (pComponents.status === 'PAUSED') { // Pause => Playing
+            /** Initialization */
             if (pInitialLabelling)
                 pInitialLabelling(pLivingCells);
+            
+            // The initial situation needs to be added to the "Situation Memory"
+            pSituationHistory.addSituation(pLivingCells); 
 
-            pComponents.repeat = setInterval(() => {
-                pLifeRound(pLivingCells); 
-                pCycleDetection(pLivingCells, pSituationHistory);
-            }, 1000);
+            /** Here we go! */
+            pComponents.repeat = setInterval(() => 
+                {
+                    pLifeRound(pLivingCells); 
+                    pCycleDetection(pLivingCells, pSituationHistory);
+                }, 
+                1000);
 
             pComponents.status = GameStatus.PLAYING;
         } else { // Playing => Pause

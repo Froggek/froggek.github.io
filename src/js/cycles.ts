@@ -46,7 +46,7 @@ export class SituationMemory {
     }
 
     public processCycles(pCallBack: (pLength: number) => void): void {
-        this._cycles.forEach(_c => { pCallBack(_c._length) }); 
+        this._cycles.forEach((_c: Cycle) => { pCallBack(_c._length) }); 
     }
 }; 
 
