@@ -49,7 +49,15 @@ hydrateSituationFromJSON(
 
 
 /** Spaceship - Glider */
-/*hydrateSituationFromJSON(
+/* hydrateSituationFromJSON(
     '{"liveCells":[[-13,-14],[-12,-13],[-12,-12],[-13,-12],[-14,-12]]}', 
     liveCells); 
+*/
+
+// V1 
+/** Issue with labelling algo */
+/* liveCells.hydrateSituationFromJSON(
+    '{"liveCells":[{"x":-5,"y":-2,"groupID":-1},{"x":-5,"y":-1,"groupID":-1},{"x":-5,"y":1,"groupID":-1},' 
+        + '{"x":-5,"y":0,"groupID":-1},{"x":-5,"y":2,"groupID":-1},{"x":-5,"y":3,"groupID":-1},{"x":-6,"y":-1,"groupID":-1},'
+        + '{"x":-6,"y":0,"groupID":-1},{"x":-6,"y":1,"groupID":-1},{"x":-6,"y":2,"groupID":-1}]}'); 
 */

@@ -35,7 +35,10 @@ let UIComponents: GridUIComponents = { status: GameStatus.PAUSED };
     '{"x":-4,"y":-4,"groupID":2},{"x":-2,"y":-4,"groupID":3},{"x":-2,"y":-3,"groupID":3},{"x":-4,"y":-1,"groupID":4},{"x":-3,"y":-1,"groupID":4},' + 
     '{"x":-2,"y":-1,"groupID":4},{"x":-4,"y":2,"groupID":5},{"x":-3,"y":2,"groupID":5},{"x":-2,"y":2,"groupID":5},{"x":-3,"y":3,"groupID":5}]}'); 
 */
-
+liveCells.hydrateSituationFromJSON(
+    '{"liveCells":[{"x":-5,"y":-2,"groupID":-1},{"x":-5,"y":-1,"groupID":-1},{"x":-5,"y":1,"groupID":-1},' 
+        + '{"x":-5,"y":0,"groupID":-1},{"x":-5,"y":2,"groupID":-1},{"x":-5,"y":3,"groupID":-1},{"x":-6,"y":-1,"groupID":-1},'
+        + '{"x":-6,"y":0,"groupID":-1},{"x":-6,"y":1,"groupID":-1},{"x":-6,"y":2,"groupID":-1}]}'); 
 
 /** HERE WE GO! */
 updateUI(liveCells); 

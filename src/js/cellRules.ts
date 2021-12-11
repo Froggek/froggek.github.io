@@ -45,21 +45,27 @@ export function applyLifeRules(pLiveCells: ListOfCells): void {
             wCellDelta.set(_deadCellCoords, /* cell resurrects */ true );        
     }); 
 
-    // Updating the live cells, according to the "Delta"
+    // Cells which will resurrect are updated in the main list 
     wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
         if (_willLive) // Resurrection
             pLiveCells.set(_coords, /* resurrects */ true);
-        
-        else // Death 
-            pLiveCells.delete(_coords); 
     });  
 
     /** 
      * Resurrecting cells (and ONLY those) gets labelled 
      * This will automatically re-label their neighbors, if need be
+     * /!\ This must happen: 
+     *      - AFTER resurrecting dead cells 
+     *      - And BEFORE removing dead cells 
      */
      wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
         if (_willLive) 
             pLiveCells.labelCell(_coords);   
+    }); 
+
+    // Cells which will die are updated in the main list 
+    wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
+        if (! _willLive) // Death 
+        pLiveCells.delete(_coords); 
     }); 
 }
