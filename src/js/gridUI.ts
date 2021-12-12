@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
 import { ListOfCells, getStrCoordinates, CellCoordinates } from './cellUtils';
-import { SituationMemory } from './cycles';
+import { SituationHistory } from './cycles';
 
 const HTML_GRID_BODY_ID:string = 'game-grid-body';
 const HTML_EXPORT_AREA_ID:string = 'export-area';
@@ -59,10 +59,10 @@ function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
 }
 
 
-export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHistory: SituationMemory,
+export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHistory: SituationHistory,
         pComponents: GridUIComponents, 
         pLifeRound: (l: ListOfCells) => void,
-        pCycleDetection: (l: ListOfCells, h: SituationMemory) => void,
+        pCycleDetection: (l: ListOfCells, h: SituationHistory) => void,
         pInitialLabelling? : (l: ListOfCells) => void): void {
 
     // Start/Pause button
@@ -148,7 +148,7 @@ export function updateUI(pLiveCells: ListOfCells): void {
     }
 }
 
-export function displayCycles(pSituations: SituationMemory): void {
+export function displayCycles(pSituations: SituationHistory): void {
     if (pSituations.hasCycles()) {
         let wListOfCycles: string = '';
 

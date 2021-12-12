@@ -13,7 +13,7 @@ class Cycle {
 
 // type GroupSituationMemory = Map<number, >; 
 
-export class SituationMemory {
+export class SituationHistory {
     private _situations: Array<Situation> = new Array();
     private _cycles: Array<Cycle> = new Array(); 
 
