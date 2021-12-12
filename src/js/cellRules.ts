@@ -8,8 +8,9 @@ import { CellCoordinates, ListOfCells } from './cellUtils';
  *      Similarly, all other dead cells stay dead. 
 */
 export function applyLifeRules(pLiveCells: ListOfCells): void {
-    // TODO: replace by a Set? 
-    let wDeadCells: ListOfCells = new ListOfCells(); 
+    // Set of dead cells 
+    let wDeadCells: Set<CellCoordinates> = new Set<CellCoordinates>(); 
+
     // K = coordinates
     // V = will die or live at the end of the round 
     let wCellDelta: Map<CellCoordinates, boolean> = new Map(); 
@@ -30,14 +31,14 @@ export function applyLifeRules(pLiveCells: ListOfCells): void {
 
         // The dead neighbours are added to a temp map, so they can be processed right after 
         wDeadNeighbors.forEach(
-            (_deadCellCoords: CellCoordinates) => { wDeadCells.set(_deadCellCoords, false) }); 
+            (_deadCellCoords: CellCoordinates) => { wDeadCells.add(_deadCellCoords) }); 
     }); 
 
     /**
      * Resurrections 
-     * Dead cell with 3 neighbors revive 
+     * Dead cell with 3 neighbors revives 
      */
-    wDeadCells.processCells((_, _deadCellCoords: CellCoordinates) => {
+    wDeadCells.forEach((_deadCellCoords: CellCoordinates, _: string) => {
         let livingNeighbors: CellCoordinates[] = pLiveCells.getLivingNeighborCoords(_deadCellCoords);
         
         // The "revivors" are stored in the temp map 

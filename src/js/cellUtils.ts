@@ -63,7 +63,7 @@ class CellState {
     }
 };
 
-export class ListOfCells  {
+export class ListOfCells {
      
     private _list: Map<CellCoordinates, CellState> = new Map(); // "x,y" => isAlive?
 
@@ -213,10 +213,10 @@ export class ListOfCells  {
     }
 
     /** 
-     * Removes any existing group from teh cells, 
-     * and resets the group IS counter 
+     * Removes any existing group from the cells, 
+     * and resets the group ID counter 
     */
-   public clearGroups(): void {
+   private clearGroups(): void {
         this.processCells(
             (pState: CellState, _) => { pState.clearGroup(); }); 
         

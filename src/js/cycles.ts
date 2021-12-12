@@ -1,14 +1,17 @@
 import { ListOfCells } from './cellUtils'; 
 
+
 type Situation = ListOfCells; 
 
 class Cycle {
-    _length: number = 0; 
+    _length: number; 
 
     constructor(pLength: number) {
         this._length = pLength; 
     }
 }; 
+
+// type GroupSituationMemory = Map<number, >; 
 
 export class SituationMemory {
     private _situations: Array<Situation> = new Array();
