@@ -9,7 +9,6 @@ type ListOfCoordinates = Array<
 type SituationJSON = { liveCells: ListOfCoordinates }; 
 
 class CellState { 
-    private _isAlive: boolean ; 
     private _groupId:number;
     
     private static readonly DEFAULT_GROUP_ID: number = -1; 
@@ -19,21 +18,16 @@ class CellState {
         return this._maxGroupId; 
     }
 
-    constructor(pIsAlive: boolean); 
-    constructor(pIsAlive: boolean, pGroupId?: number); 
-    constructor(pIsAlive:boolean, pGroupId?:number){
-        this._isAlive = pIsAlive; 
+    constructor(); 
+    constructor(pGroupId: number); 
+    constructor(pGroupId?:number){
         this._groupId = (pGroupId ? pGroupId : CellState.DEFAULT_GROUP_ID); 
     }
 
     public deepCopy(): CellState {
-        return new CellState(this._isAlive, this._groupId); 
+        return new CellState(this._groupId); 
     }
 
-    // TODO: remove attribute 
-    private isAlive(): boolean {
-        return this._isAlive; 
-    }
     public groupId(): number {
         return this._groupId; 
     } 
@@ -48,8 +42,7 @@ class CellState {
     }
 
     public isEqualTo(pRHS: CellState): boolean {
-        return (this.isAlive() === pRHS.isAlive()) 
-            && (this.groupId() === pRHS.groupId()); 
+        return (this.groupId() === pRHS.groupId()); 
     }
 
     public setGroupId(pGroupId: number): number {
@@ -77,13 +70,18 @@ export class ListOfCells {
     private getCell(pCoords: CellCoordinates): CellState | undefined {
         return this._list.get(pCoords); 
     }; 
+    public set(pCoords: CellCoordinates): void; 
     public set(pCoords: CellCoordinates, pState: CellState): void; 
-    public set(pCoords: CellCoordinates, pIsAlive: boolean, pGroupId?: number): void; 
-    public set(pCoords: CellCoordinates, pStateOrIsAlive: CellState | boolean, pGroupId?: number): void {
-        if (pStateOrIsAlive instanceof CellState)
-            this._list.set(pCoords, pStateOrIsAlive); 
-        else         
-            this._list.set(pCoords, new CellState(pStateOrIsAlive, pGroupId)); 
+    public set(pCoords: CellCoordinates, pGroupId: number): void; 
+    public set(pCoords: CellCoordinates, pStateOrGroupId?: CellState | number): void {
+        if (pStateOrGroupId === undefined)
+            this._list.set(pCoords, new CellState());
+
+        else if (pStateOrGroupId instanceof CellState)
+            this._list.set(pCoords, pStateOrGroupId);
+
+        else // Group ID is provided      
+            this._list.set(pCoords, new CellState(pStateOrGroupId)); 
     }
     public delete(pCoords: CellCoordinates): boolean {
         return this._list.delete(pCoords); 
@@ -209,7 +207,7 @@ export class ListOfCells {
 
         (kObj as SituationJSON).liveCells.forEach(
             // TODO: do we want to serialize the groups? 
-            pCell => this.set( getStrCoordinates(pCell.x, pCell.y), true, pCell.groupID )); 
+            pCell => this.set( getStrCoordinates(pCell.x, pCell.y), pCell.groupID )); 
     }
 
     /** 

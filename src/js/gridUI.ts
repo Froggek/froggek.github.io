@@ -37,7 +37,7 @@ export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document)
                 kHtmlElt.removeClass(CSS_LIVE_CELL_CLASS_NAME);
                 kHtmlElt.css('background-color', ''); 
             } else { // Dead => Alive
-                pLivingCells.set(kStrCoords, true);
+                pLivingCells.set(kStrCoords);
                 kHtmlElt.addClass(CSS_LIVE_CELL_CLASS_NAME);
             }
         }

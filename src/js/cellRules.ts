@@ -49,7 +49,7 @@ export function applyLifeRules(pLiveCells: ListOfCells): void {
     // Cells which will resurrect are updated in the main list 
     wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
         if (_willLive) // Resurrection
-            pLiveCells.set(_coords, /* resurrects */ true);
+            pLiveCells.set(_coords);
     });  
 
     /** 
