@@ -5,7 +5,9 @@
         "preserveConstEnums": true,
         "sourceMap": true, 
 
-        "strictNullChecks": true, 
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+        
         "allowSyntheticDefaultImports": true, 
         "esModuleInterop": true, 
 

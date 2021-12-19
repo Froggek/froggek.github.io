@@ -1,72 +1,72 @@
-import { CellCoordinates, ListOfCells, getIntCoordinates } from './cellUtils'; 
-
-function getNeighborCoordinates(coords: CellCoordinates): Array<CellCoordinates> {
-    let result: Array<CellCoordinates> = new Array() ;
-
-    const cellIntCoords = getIntCoordinates(coords); 
-
-    for (let x:number = -1; x <= 1; x++) {
-        for (let y:number = -1; y <= 1; y++ ) {
-            // The cell itself isn't a neighbor 
-            if (! ((x === 0) && (y === 0)))
-                result.push((cellIntCoords.x + x) + ',' + (cellIntCoords.y + y)); 
-        }
-    }
-
-    return result; 
-}
-
-function getNbOfLivingNeighbors(coords: CellCoordinates, livingCells: ListOfCells): number {
-    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
-
-    return neighborCoords
-            .filter((neighbor: CellCoordinates) => { return livingCells.has(neighbor) })
-            .length; 
-}
-
-function getDeadNeighbors(coords: CellCoordinates, livingCells: ListOfCells): CellCoordinates[] {
-    const neighborCoords:CellCoordinates[] = getNeighborCoordinates(coords);
-    
-    return neighborCoords.filter((neighbor: CellCoordinates) => { return ! livingCells.has(neighbor) }); 
-}
+import { CellCoordinates, ListOfCells } from './cellUtils'; 
 
 /**  Applying rules 
  * 1-Any live cell with two or three live neighbours survives.
  * 2-Any dead cell with three live neighbours becomes a live cell.
+ *  [Here, the cells get (re)labelled]
  * 3-All other live cells die in the next generation. 
  *      Similarly, all other dead cells stay dead. 
 */
-export function applyLifeRules(pLiveCells: ListOfCells, pDeadCells: ListOfCells): void {
-    // Processing live cells
-    pLiveCells.forEach((v, k) => {
-        const deadNeighbors: CellCoordinates[] = getDeadNeighbors(k, pLiveCells); 
+export function applyLifeRules(pLiveCells: ListOfCells): void {
+    // Set of dead cells 
+    let wDeadCells: Set<CellCoordinates> = new Set<CellCoordinates>(); 
+
+    // K = coordinates
+    // V = will die or live at the end of the round 
+    let wCellDelta: Map<CellCoordinates, boolean> = new Map(); 
+    
+    /**
+     * Processing live cells 
+     * The ones which will die are temporarily stored in the "Delta" map 
+     */ 
+    pLiveCells.processCells((_, _coords) => {
+        let wDeadNeighbors: CellCoordinates[] = pLiveCells.getDeadNeighborCoords(_coords); 
         
         // Live cells in under/overpopulation die 
-        const nbOfLivingNeighbors: number = 8 - deadNeighbors.length; 
-        if ((nbOfLivingNeighbors < 2) || (nbOfLivingNeighbors > 3))
-            pLiveCells.set(k, false); 
+        const kNbOfLivingNeighbors: number = 8 - wDeadNeighbors.length; 
 
-        // Dead neighbors need to be processed ... later on
-        deadNeighbors.forEach(
-            (deadCellCoords: CellCoordinates) => { pDeadCells.set(deadCellCoords, false) });
+        if ((kNbOfLivingNeighbors < 2) || (kNbOfLivingNeighbors > 3))
+            wCellDelta.set(_coords, false); 
+            // TODO: to be removed // LiveCells.set(_coords, false); 
+
+        // The dead neighbours are added to a temp map, so they can be processed right after 
+        wDeadNeighbors.forEach(
+            (_deadCellCoords: CellCoordinates) => { wDeadCells.add(_deadCellCoords) }); 
     }); 
 
-    // Processing dead cells
-    pDeadCells.forEach((v, k) => {
-        if (getNbOfLivingNeighbors(k, pLiveCells) === 3)
-            pDeadCells.set(k, true); 
-    }); 
-    
-    // Moving and cleansing 
-    pDeadCells.forEach((v, k) => {
-        if (v)
-            pLiveCells.set(k, true); 
+    /**
+     * Resurrections 
+     * Dead cell with 3 neighbors revives 
+     */
+    wDeadCells.forEach((_deadCellCoords: CellCoordinates, _: string) => {
+        let livingNeighbors: CellCoordinates[] = pLiveCells.getLivingNeighborCoords(_deadCellCoords);
+        
+        // The "revivors" are stored in the temp map 
+        if (livingNeighbors.length === 3)
+            wCellDelta.set(_deadCellCoords, /* cell resurrects */ true );        
     }); 
 
-    pDeadCells.clear(); // = new Map(); 
+    // Cells which will resurrect are updated in the main list 
+    wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
+        if (_willLive) // Resurrection
+            pLiveCells.set(_coords);
+    });  
 
-    for (const [k, v] of pLiveCells) {
-        if (! v)
-            pLiveCells.delete(k); 
-    }
+    /** 
+     * Resurrecting cells (and ONLY those) gets labelled 
+     * This will automatically re-label their neighbors, if need be
+     * /!\ This must happen: 
+     *      - AFTER resurrecting dead cells 
+     *      - And BEFORE removing dead cells 
+     */
+     wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
+        if (_willLive) 
+            pLiveCells.labelCell(_coords);   
+    }); 
+
+    // Cells which will die are updated in the main list 
+    wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
+        if (! _willLive) // Death 
+        pLiveCells.delete(_coords); 
+    }); 
 }

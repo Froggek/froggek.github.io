@@ -2,80 +2,58 @@
 // import $ from 'jquery'; // No need of JQuery here! 
 import 'bootstrap';  
 
-import { ListOfCells, hydrateSituationFromJSON } from './js/cellUtils';
+import { ListOfCells } from './js/cellUtils';
 import { applyLifeRules } from './js/cellRules';  
-import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus } from './js/gridUI';
+import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus, displayCycles } from './js/gridUI';
+import { SituationHistory } from './js/cycles';
 
 // CSS 
 import './css/main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 
-function lifeRound(pLiveCells:ListOfCells, pDeadCells: ListOfCells): void {
-    applyLifeRules(pLiveCells, pDeadCells); 
-    updateUI(pLiveCells, pDeadCells); 
+function lifeRound(pLiveCells:ListOfCells): void {
+    applyLifeRules(pLiveCells); 
+    updateUI(pLiveCells); 
 }
 
+function cycleDetection(pLiveCells: ListOfCells, pSituationHistory: SituationHistory): void {
+    pSituationHistory.addSituation(pLiveCells);
+    pSituationHistory.searchForCycles(); 
+    displayCycles(pSituationHistory); 
+}
+
+//TODO: have a proper object 
 // Initialization 
-let liveCells:ListOfCells = new Map();
-let deadCells: ListOfCells = new Map();
-
-// https://en.wikipedia.org/wiki/Conway's_Game_of_Life#Examples_of_patterns 
-/** Oscillator - Blinker  */
-/*liveCells.set('0,0', true);
-liveCells.set('1,0', true);
-liveCells.set('2,0', true);
-*/ 
-
-/** Oscillator - Toad */
-/*liveCells.set('1,0', true);
-liveCells.set('2,0', true);
-liveCells.set('3,0', true); 
-liveCells.set('0,1', true);
-liveCells.set('1,1', true);
-liveCells.set('2,1', true);
-*/
-
-/** Oscillator - Beacon */
-/* 
-liveCells.set('0,0', true);
-liveCells.set('0,1', true);
-liveCells.set('1,0', true);
-liveCells.set('1,1', true);
-liveCells.set('2,2', true);
-liveCells.set('2,3', true);
-liveCells.set('3,2', true);
-liveCells.set('3,3', true);
-*/
-
-/** Oscillator - Pulsar */
-/*
-hydrateSituationFromJSON(
-    '{"liveCells":[[-6,-7],[-5,-7],[-4,-7],[-3,-5],[-3,-4],[-3,-3],[-4,-2],[-5,-2],[-6,-2],' 
-        + '[-8,-3],[-8,-4],[-8,-5],[-1,-5],[-1,-4],[-1,-3],[0,-2],[1,-2],[2,-2],[4,-3],[4,-4],'
-        + '[4,-5],[2,-7],[1,-7],[0,-7],[-6,0],[-5,0],[-4,0],[0,0],[1,0],[2,0],[-3,1],[-3,2],'
-        + '[-3,3],[-1,1],[-1,2],[-1,3],[0,5],[1,5],[2,5],[-4,5],[-5,5],[-6,5],[4,3],[4,2],[4,1],[-8,1],[-8,2],[-8,3]]}', 
-    liveCells); 
-*/
-
-/** Oscillator - Penta-decathlon */
-/*
-hydrateSituationFromJSON(
-    '{"liveCells":[[-1,-8],[-1,-7],[-2,-6],[-1,-6],[0,-6],[-2,-3],[-1,-3],[0,-3],[-1,-2],'
-        + '[-1,-1],[-1,0],[-1,1],[-2,2],[-1,2],[0,2],[-2,5],[-1,5],[0,5],[-1,6],[-1,7]]}', 
-    liveCells); 
-*/
-
-/** Spaceship - Glider */
-/*hydrateSituationFromJSON(
-    '{"liveCells":[[-13,-14],[-12,-13],[-12,-12],[-13,-12],[-14,-12]]}', 
-    liveCells); 
-*/
+let liveCells: ListOfCells = new ListOfCells();
+let situationHistory: SituationHistory = new SituationHistory(); 
 
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
 
+// TODO: shouldn't be there... 
+/*liveCells.hydrateSituationFromJSON('{"liveCells":[{"x":-4,"y":-9,"groupID":0},{"x":-3,"y":-9,"groupID":0},{"x":-2,"y":-9,"groupID":0},' + 
+    '{"x":-3,"y":-10,"groupID":0},{"x":-4,"y":-6,"groupID":1},{"x":-3,"y":-6,"groupID":1},{"x":-2,"y":-6,"groupID":1},{"x":-4,"y":-3,"groupID":2},' + 
+    '{"x":-4,"y":-4,"groupID":2},{"x":-2,"y":-4,"groupID":3},{"x":-2,"y":-3,"groupID":3},{"x":-4,"y":-1,"groupID":4},{"x":-3,"y":-1,"groupID":4},' + 
+    '{"x":-2,"y":-1,"groupID":4},{"x":-4,"y":2,"groupID":5},{"x":-3,"y":2,"groupID":5},{"x":-2,"y":2,"groupID":5},{"x":-3,"y":3,"groupID":5}]}'); 
+*/
+/*liveCells.hydrateSituationFromJSON(
+    '{"liveCells":[{"x":-5,"y":-2,"groupID":-1},{"x":-5,"y":-1,"groupID":-1},{"x":-5,"y":1,"groupID":-1},' 
+        + '{"x":-5,"y":0,"groupID":-1},{"x":-5,"y":2,"groupID":-1},{"x":-5,"y":3,"groupID":-1},{"x":-6,"y":-1,"groupID":-1},'
+        + '{"x":-6,"y":0,"groupID":-1},{"x":-6,"y":1,"groupID":-1},{"x":-6,"y":2,"groupID":-1}]}'); 
+*/
+
+// Glider 
+/*liveCells.hydrateSituationFromJSON(
+    '{"liveCells":[{"x":-12,"y":-14,"groupID":-1},{"x":-12,"y":-13,"groupID":-1},'
+        + '{"x":-12,"y":-12,"groupID":-1},{"x":-13,"y":-12,"groupID":-1},{"x":-14,"y":-13,"groupID":-1}]}'); 
+*/
+
 /** HERE WE GO! */
-updateUI(liveCells, deadCells); 
+updateUI(liveCells); 
 
 addGridListeners(liveCells, document);
-addGridButtonListeners(liveCells, deadCells, lifeRound, UIComponents);  
+addGridButtonListeners(liveCells, situationHistory, 
+    UIComponents, 
+    lifeRound, cycleDetection, 
+    /* Initial labelling=*/ (l: ListOfCells) => { l.clearAndLabelGroups() } 
+    );  
 
