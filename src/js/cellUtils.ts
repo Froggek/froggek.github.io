@@ -197,7 +197,7 @@ export class ListOfCells {
         return JSON.stringify(result); 
     } 
 
-    public hydrateSituationFromJSON(pRawSituation: string): void {
+    public deserializeSituationFromJSON(pRawSituation: string): void {
         const kObj:any = JSON.parse(pRawSituation);
         
         if (! (kObj as SituationJSON).liveCells)
