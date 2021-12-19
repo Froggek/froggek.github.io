@@ -2,7 +2,7 @@
 // import $ from 'jquery'; // No need of JQuery here! 
 import 'bootstrap';  
 
-import { ListOfCells } from './js/cellUtils';
+import { ListOfCells } from './js/ListOfCells';
 import { applyLifeRules } from './js/cellRules';  
 import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus, displayCycles } from './js/gridUI';
 import { SituationHistory } from './js/cycles';

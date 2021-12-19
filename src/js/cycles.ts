@@ -1,4 +1,4 @@
-import { ListOfCells } from './cellUtils'; 
+import { ListOfCells } from './ListOfCells'; 
 
 type Situation = ListOfCells; 
 

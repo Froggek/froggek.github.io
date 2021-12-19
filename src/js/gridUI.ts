@@ -1,7 +1,9 @@
 import $ from 'jquery';
 
-import { ListOfCells, getStrCoordinates, CellCoordinates } from './cellUtils';
+import { getStrCoordinates, CellCoordinates } from './cellUtils';
+import { ListOfCells } from './ListOfCells';
 import { SituationHistory } from './cycles';
+import { serializeToJSON } from './cellJSONFormats';
 
 const HTML_GRID_BODY_ID:string = 'game-grid-body';
 const HTML_EXPORT_AREA_ID:string = 'export-area';
@@ -98,7 +100,7 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHist
     // Export btn
     $(`#${HTML_EXPORT_BTN_ID}`).on('click', e => {
         if (pComponents.status === GameStatus.PAUSED) {
-            $(`#${HTML_EXPORT_AREA_ID}`).text(pLivingCells.serializeSituation2JSON());
+            $(`#${HTML_EXPORT_AREA_ID}`).text( serializeToJSON(pLivingCells));
         } else
             alert('Cannot export while the game is running');
     });
