@@ -1,6 +1,5 @@
 import { ListOfCells } from './cellUtils'; 
 
-
 type Situation = ListOfCells; 
 
 class Cycle {
@@ -10,8 +9,6 @@ class Cycle {
         this._length = pLength; 
     }
 }; 
-
-// type GroupSituationMemory = Map<number, >; 
 
 export class SituationHistory {
     private _situations: Array<Situation> = new Array();

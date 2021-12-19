@@ -1,4 +1,4 @@
-export type CellCoordinates = string; 
+export class CellCoordinates extends String {}; 
 
 type ListOfCoordinates = Array< 
                             { 

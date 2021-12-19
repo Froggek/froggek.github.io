@@ -30,7 +30,7 @@ export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document)
         if (kHtmlElt.is(`#${HTML_GRID_BODY_ID} *`)) {
 
             // Is the cell dead or alive?
-            const kStrCoords:string = getStrCoordinates( /* x= */ kHtmlElt.data('col'), /* y= */ kHtmlElt.parent().data('row') );
+            const kStrCoords:CellCoordinates = getStrCoordinates( /* x= */ kHtmlElt.data('col'), /* y= */ kHtmlElt.parent().data('row') );
 
             if (pLivingCells.has(kStrCoords)) { // Alive => Dead
                 pLivingCells.delete(kStrCoords);
