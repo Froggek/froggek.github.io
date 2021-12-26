@@ -6,6 +6,7 @@ import { ListOfCells } from './js/ListOfCells';
 import { applyLifeRules } from './js/cellRules';  
 import { addGridListeners, addGridButtonListeners, updateUI, GridUIComponents, GameStatus, displayCycles } from './js/gridUI';
 import { SituationHistory } from './js/cycles';
+import { Ecosystem } from './js/Philogenesis';
 
 // CSS 
 import './css/main.css'; 
@@ -22,10 +23,11 @@ function cycleDetection(pLiveCells: ListOfCells, pSituationHistory: SituationHis
     displayCycles(pSituationHistory); 
 }
 
-//TODO: have a proper object 
 // Initialization 
-let liveCells: ListOfCells = new ListOfCells();
-let situationHistory: SituationHistory = new SituationHistory(); 
+let _deprecated_situationHistory: SituationHistory = new SituationHistory(); 
+
+let ecosystem: Ecosystem = new Ecosystem(); 
+
 
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
 
@@ -48,10 +50,10 @@ let UIComponents: GridUIComponents = { status: GameStatus.PAUSED };
 */
 
 /** HERE WE GO! */
-updateUI(liveCells); 
+updateUI(ecosystem.livingCells); 
 
-addGridListeners(liveCells, document);
-addGridButtonListeners(liveCells, situationHistory, 
+addGridListeners(ecosystem.livingCells, document);
+addGridButtonListeners(ecosystem.livingCells, _deprecated_situationHistory, 
     UIComponents, 
     lifeRound, cycleDetection, 
     /* Initial labelling=*/ (l: ListOfCells) => { l.clearAndLabelGroups() } 
