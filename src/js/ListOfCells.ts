@@ -96,16 +96,15 @@ export class ListOfCells {
     }
 
     public getLivingNeighborCoords(coords: CellCoordinates): CellCoordinates[] {
-        const neighborCoords:CellCoordinates[] = ListOfCells.getNeighborCoordinates(coords);
-    
-        return neighborCoords
+        return ListOfCells
+                .getNeighborCoordinates(coords)
                 .filter((neighbor: CellCoordinates) => { return this.has(neighbor) }); 
     }
     
     public getDeadNeighborCoords(coords: CellCoordinates): CellCoordinates[] {
-        const neighborCoords:CellCoordinates[] = ListOfCells.getNeighborCoordinates(coords);
-        
-        return neighborCoords.filter((neighbor: CellCoordinates) => { return ! this.has(neighbor) }); 
+        return ListOfCells
+                .getNeighborCoordinates(coords)
+                .filter((neighbor: CellCoordinates) => { return ! this.has(neighbor) }); 
     }
 
     /** JSON serialization */
