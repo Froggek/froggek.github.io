@@ -145,7 +145,7 @@ export function updateUI(pLiveCells: ListOfCells): void {
                 + (pLiveCells.has(kStrCoords) ? `class="${CSS_LIVE_CELL_CLASS_NAME}" ` : '')
                 // TODO: should be a class...
                 + ((kGroupId !== undefined) ? 
-                        'style="background-color: ' + CSS_GROUP_COLORS[kGroupId % CSS_GROUP_COLORS.length ] + ';" ' 
+                        'style="background-color: ' + CSS_GROUP_COLORS[kGroupId % CSS_GROUP_COLORS.length] + ';" ' 
                         : '')
                 + ' ></td>'
                 ;

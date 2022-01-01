@@ -1,5 +1,5 @@
 export class Cycle {
-    public static NO_CYCLE_LENGTH: number = 0;  
+    public static readonly NO_CYCLE_LENGTH: number = 0;  
     private _length: number; 
     
     constructor(); 
