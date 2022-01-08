@@ -9,6 +9,9 @@ export class CellState {
     public static maxGroupId(): number {
         return this._maxGroupId; 
     }
+    public static defaultGroupId(): number {
+        return this.DEFAULT_GROUP_ID; 
+    }
 
     constructor(); 
     constructor(pGroupId: number); 
@@ -37,11 +40,19 @@ export class CellState {
         return (this.groupId() === pRHS.groupId()); 
     }
 
-    public setGroupId(pGroupId: number): number {
-        CellState._maxGroupId = Math.max(CellState._maxGroupId, pGroupId);  
+    private updateGroupId(pGroupId: number, pUpdateMaxGroupId: boolean): number {
+        if (pUpdateMaxGroupId)
+            CellState._maxGroupId = Math.max(CellState._maxGroupId, pGroupId);  
+        
         this._groupId = pGroupId; 
 
         return this._groupId; 
+    }
+    public setGroupId(pGroupId: number): number {
+        return this.updateGroupId(pGroupId, true); 
+    }
+    public setUndefinedGroupId(): number {
+        return this.updateGroupId(CellState.DEFAULT_GROUP_ID, false); 
     }
     public setNewGroupId(): number {
         return this.setGroupId(CellState._maxGroupId + 1); 

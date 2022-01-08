@@ -24,17 +24,17 @@ export function serializeToJSON(pCells: ListOfCells): string {
         return JSON.stringify(result); 
 }
 
-export function deserializeFromJSON(pRawList: string, pList: ListOfCells): void {
+export function deserializeFromJSON(pRawList: string, oList: ListOfCells): void {
     const kObj:any = JSON.parse(pRawList);
         
     if (! (kObj as SituationJSON).liveCells)
         throw 'The given input cannot be interpreted as a game situation'; 
         
-    pList.clear(); 
+    oList.clear(); 
 
     (kObj as SituationJSON).liveCells.forEach(
         // TODO: do we want to serialize the groups? 
-        pCell => pList.set( getStrCoordinates(pCell.x, pCell.y) /*, pCell.groupID */ )); 
+        _cell => oList.set( getStrCoordinates(_cell.x, _cell.y) /*, pCell.groupID */ )); 
 }
 
 

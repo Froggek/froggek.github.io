@@ -11,6 +11,7 @@ const HTML_CYCLES_AREA_ID: string ='cycles-panel-content';
 const HTML_START_PAUSE_BTN_ID: string = 'start-btn';
 const HTML_EXPORT_BTN_ID: string = 'export-btn'; 
 const HTML_LABEL_REFRESH_BTN_ID: string = 'label-and-paint-btn'; 
+const HTML_SPLIT_GROUPS_BTN_ID: string = 'split-groups-btn'; 
 
 const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell';
 
@@ -110,7 +111,7 @@ export function addGridButtonListeners(pEcosystem: Ecosystem,
     });
 
     /**  DEBUG STUFFS */
-    // Label & Refresh UI
+    // Label groups & Refresh UI
     $(`#${HTML_LABEL_REFRESH_BTN_ID}`).on('click', e => {
         if (pComponents.status === GameStatus.PAUSED) {
             pEcosystem.livingCells.clearAndLabelGroups(); 
@@ -119,7 +120,14 @@ export function addGridButtonListeners(pEcosystem: Ecosystem,
             alert('Cannot export while the game is running');
     });  
 
-
+    // Split groups
+    $(`#${HTML_SPLIT_GROUPS_BTN_ID}`).on('click', e => {
+        if (pComponents.status === GameStatus.PAUSED) {
+            pEcosystem.livingCells.splitGroups(); 
+            updateUI(pEcosystem.livingCells); 
+        } else
+            alert('Cannot export while the game is running');
+    }); 
 }
 
 export function updateUI(pLiveCells: ListOfCells): void {

@@ -10,6 +10,7 @@ import { Ecosystem } from './js/Philogenesis';
 // CSS 
 import './css/main.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; 
+import { deserializeFromJSON } from './js/cellJSONFormats';
 
 function lifeRound(pLiveCells:ListOfCells): void {
     applyLifeRules(pLiveCells); 
@@ -27,6 +28,11 @@ let ecosystem: Ecosystem = new Ecosystem();
 let UIComponents: GridUIComponents = { status: GameStatus.PAUSED }; 
 
 // TODO: shouldn't be there... 
+deserializeFromJSON('{"liveCells":[{"x":-12,"y":-1},{"x":-11,"y":-1},{"x":-10,"y":-1},' +
+    '{"x":-12,"y":1},{"x":-11,"y":1},{"x":-10,"y":1},{"x":-12,"y":-3},{"x":-11,"y":-3},' +
+    '{"x":-10,"y":-3},{"x":-11,"y":-2},{"x":-11,"y":0}]}', 
+    ecosystem.livingCells);
+
 /*liveCells.hydrateSituationFromJSON('{"liveCells":[{"x":-4,"y":-9,"groupID":0},{"x":-3,"y":-9,"groupID":0},{"x":-2,"y":-9,"groupID":0},' + 
     '{"x":-3,"y":-10,"groupID":0},{"x":-4,"y":-6,"groupID":1},{"x":-3,"y":-6,"groupID":1},{"x":-2,"y":-6,"groupID":1},{"x":-4,"y":-3,"groupID":2},' + 
     '{"x":-4,"y":-4,"groupID":2},{"x":-2,"y":-4,"groupID":3},{"x":-2,"y":-3,"groupID":3},{"x":-4,"y":-1,"groupID":4},{"x":-3,"y":-1,"groupID":4},' + 

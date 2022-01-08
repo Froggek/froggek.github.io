@@ -95,10 +95,13 @@ export class ListOfCells {
         return result; 
     }
 
-    public getLivingNeighborCoords(coords: CellCoordinates): CellCoordinates[] {
+    public getLivingNeighborCoords(pCoords: CellCoordinates, pSameGroup: boolean = false): CellCoordinates[] {
         return ListOfCells
-                .getNeighborCoordinates(coords)
-                .filter((neighbor: CellCoordinates) => { return this.has(neighbor) }); 
+                .getNeighborCoordinates(pCoords)
+                .filter((_neighbor: CellCoordinates) => { 
+                    return this.has(_neighbor) 
+                        && ((! pSameGroup) || (this.getCell(_neighbor)?.groupId() === this.getCell(pCoords)?.groupId()))
+                }); 
     }
     
     public getDeadNeighborCoords(coords: CellCoordinates): CellCoordinates[] {
@@ -203,5 +206,47 @@ export class ListOfCells {
         }); 
         
         return this.setGroupId(pCellToLabelCoords, kMinGroupId); 
+    }
+
+    /** Splitting groups */
+    public splitGroups(): void {
+        const kInitUnreachableGroupId: number = CellState.maxGroupId() + 1; 
+        let wCurrentGroupId: number = kInitUnreachableGroupId;
+        let wCurrentGroup: Map<CellCoordinates, CellState> = new Map(); 
+
+        this.processCells((_state: CellState, _coords: CellCoordinates) => {
+            if (_state.hasGroup())
+                wCurrentGroupId = Math.min(wCurrentGroupId, _state.groupId()); 
+        }); 
+
+        // Just in case... 
+        if (wCurrentGroupId === kInitUnreachableGroupId) 
+            return; 
+        
+        // All the cells from the current group are assigned a temp group ID 
+        this.processCells((_state: CellState, _coords: CellCoordinates) => {
+            if (_state.groupId() === wCurrentGroupId) {
+                _state.setUndefinedGroupId();
+                
+                // Arbitrarily, the first cell will form the group
+                if (! wCurrentGroup.size)
+                    wCurrentGroup.set(_coords, _state); 
+            }
+        }); 
+
+        let wSubGroupId = wCurrentGroupId; 
+
+        while (wCurrentGroup.size) {
+            const [[_coords, _state]] = wCurrentGroup; 
+            
+            // Finding neighbors in the group
+            let wNeighborsInGroup = this.getLivingNeighborCoords(_coords, true);
+            wNeighborsInGroup.forEach((_neighborCoords: CellCoordinates) => { 
+                wCurrentGroup.set(_neighborCoords, this.getCell(_neighborCoords)!) 
+            }); 
+            // The initial cell gets labelled, and is removed from the temp list
+            _state.setGroupId(wSubGroupId);
+            wCurrentGroup.delete(_coords);      
+        } // End while: the new group is completely formed 
     }
 }; 
