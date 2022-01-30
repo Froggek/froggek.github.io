@@ -14,6 +14,8 @@ const HTML_LABEL_REFRESH_BTN_ID: string = 'label-and-paint-btn';
 const HTML_SPLIT_GROUPS_BTN_ID: string = 'split-groups-btn'; 
 
 const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell';
+const CSS_TOOLTIP_GRID_CLASS_NAME: string = 'css-tooltip-grid'; 
+const CSS_TOOLTIP_GRID_CONTENT_CLASS_NAME: string = CSS_TOOLTIP_GRID_CLASS_NAME + '-content'; 
 
 const CSS_GROUP_COLORS = [ /* "black", */ "silver", "gray", "maroon", "red", 
     "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua" ];
@@ -148,14 +150,26 @@ export function updateUI(pLiveCells: ListOfCells): void {
             const kStrCoords: CellCoordinates = getStrCoordinates(j - kShiftX, i - kShiftY);
             const kGroupId: number | undefined = pLiveCells.getGroupId(kStrCoords);
 
+            let wTdClasses: string = ''; 
+            let wTdTooltip: string = ''; 
+
+            if (pLiveCells.has(kStrCoords)) {
+                wTdClasses += CSS_LIVE_CELL_CLASS_NAME; 
+
+                if (kGroupId !== undefined) {
+                    wTdClasses += ` ${CSS_TOOLTIP_GRID_CLASS_NAME}`; 
+                    wTdTooltip += `<span class="${CSS_TOOLTIP_GRID_CONTENT_CLASS_NAME}">Group #${kGroupId}</span>`; 
+                }
+            }
+
             tr += '<td data-col="' + (j - kShiftX) + '" '
                 // Dead or alive
-                + (pLiveCells.has(kStrCoords) ? `class="${CSS_LIVE_CELL_CLASS_NAME}" ` : '')
+                + `class="${wTdClasses}" `
                 // TODO: should be a class...
                 + ((kGroupId !== undefined) ? 
                         'style="background-color: ' + CSS_GROUP_COLORS[kGroupId % CSS_GROUP_COLORS.length] + ';" ' 
                         : '')
-                + ' ></td>'
+                + ` > ${wTdTooltip} </td>`
                 ;
         }
         kTableBody.append(tr + '</tr>');
