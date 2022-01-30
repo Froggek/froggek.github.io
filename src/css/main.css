@@ -19,18 +19,21 @@
 
 /* 
  * Tooltips 
- * See https://www.w3schools.com/css/css_tooltip.asp
+ * See https://stackoverflow.com/questions/13845003/tooltips-for-cells-in-html-table-no-javascript
+ *  => https://stackoverflow.com/a/41705322 
  */
-.css-tooltip {
+
+.css-tooltip-grid {
     position: relative;
-    display: inline-block; 
-    border-bottom: 1px dotted black;
 }
 
-.css-tooltip .css-tooltip-text {
-    visibility: hidden;
+.css-tooltip-grid-content {
+    display: none;
+    position: absolute;
+    z-index: 100;
+
     width: 120px;
-    bottom: 100%; 
+    bottom: 135%; 
     left: 50%; 
     margin-left: -60px; /* half of the width */
     background-color: black;
@@ -38,13 +41,10 @@
     text-align: center;
     padding: 5px 0;
     border-radius: 6px;
-
-    position: absolute;
-    z-index: 1;
 }
 
 /* Adding a tooltip arrow */
-.css-tooltip .css-tooltip-text::after {
+.css-tooltip-grid .css-tooltip-grid-content::after {
     content: " "; 
     position: absolute;
     top: 100%; /* At the bottom of the tooltip */
@@ -55,7 +55,6 @@
     border-color: black transparent transparent transparent;
 }
 
-
-.css-tooltip:hover .css-tooltip-text {
-    visibility: visible;
+.css-tooltip-grid:hover span.css-tooltip-grid-content {
+    display: block;
 }
