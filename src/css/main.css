@@ -27,6 +27,9 @@
 .css-tooltip .css-tooltip-text {
     visibility: hidden;
     width: 120px;
+    bottom: 100%; 
+    left: 50%; 
+    margin-left: -60px; /* half of the width */
     background-color: black;
     color: #fff; 
     text-align: center;
