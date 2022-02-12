@@ -1,21 +1,34 @@
 export class CellCoordinates extends String {}; 
 
-export class CellState { 
-    private _groupId:number;
-    
-    private static readonly DEFAULT_GROUP_ID: number = -1; 
-    private static _maxGroupId: number = CellState.DEFAULT_GROUP_ID; 
+export class GroupID extends Number {
+    constructor(pGroupId: number) {
+        super(pGroupId); 
+    }
 
-    public static maxGroupId(): number {
+    public toNumber(): number {
+        return Number(this); 
+    }
+}; 
+
+export class CellState { 
+    private _groupId:GroupID;
+    
+    private static readonly DEFAULT_GROUP_ID: GroupID = new GroupID(-1); 
+    private static _maxGroupId: GroupID = CellState.DEFAULT_GROUP_ID; 
+
+    public static maxGroupId(): GroupID {
         return this._maxGroupId; 
     }
-    public static defaultGroupId(): number {
+    public static newGroupId(): GroupID {
+        return new GroupID(Number(this.maxGroupId()) + 1); 
+    }
+    public static defaultGroupId(): GroupID {
         return this.DEFAULT_GROUP_ID; 
     }
 
     constructor(); 
-    constructor(pGroupId: number); 
-    constructor(pGroupId?:number){
+    constructor(pGroupId: GroupID); 
+    constructor(pGroupId?:GroupID){
         this._groupId = (pGroupId ? pGroupId : CellState.DEFAULT_GROUP_ID); 
     }
 
@@ -23,7 +36,7 @@ export class CellState {
         return new CellState(this._groupId); 
     }
 
-    public groupId(): number {
+    public groupId(): GroupID {
         return this._groupId; 
     } 
     public hasGroup(): boolean {
@@ -40,22 +53,22 @@ export class CellState {
         return (this.groupId() === pRHS.groupId()); 
     }
 
-    private updateGroupId(pGroupId: number, pUpdateMaxGroupId: boolean): number {
+    private updateGroupId(pGroupId: GroupID, pUpdateMaxGroupId: boolean): GroupID {
         if (pUpdateMaxGroupId)
-            CellState._maxGroupId = Math.max(CellState._maxGroupId, pGroupId);  
+            CellState._maxGroupId = new GroupID(Math.max(Number(CellState._maxGroupId), Number(pGroupId)));  
         
         this._groupId = pGroupId; 
 
         return this._groupId; 
     }
-    public setGroupId(pGroupId: number): number {
+    public setGroupId(pGroupId: GroupID): GroupID {
         return this.updateGroupId(pGroupId, true); 
     }
-    public setUndefinedGroupId(): number {
+    public setUndefinedGroupId(): GroupID {
         return this.updateGroupId(CellState.DEFAULT_GROUP_ID, false); 
     }
-    public setNewGroupId(): number {
-        return this.setGroupId(CellState._maxGroupId + 1); 
+    public setNewGroupId(): GroupID {
+        return this.setGroupId(CellState.newGroupId()); 
     }
 };
 

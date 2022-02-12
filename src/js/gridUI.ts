@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-import { getStrCoordinates, CellCoordinates } from './cellUtils';
+import { getStrCoordinates, CellCoordinates, GroupID } from './cellUtils';
 import { ListOfCells } from './ListOfCells';
 import { serializeToJSON } from './cellJSONFormats';
 import { Ecosystem } from './Philogenesis';
@@ -119,7 +119,7 @@ export function addGridButtonListeners(pEcosystem: Ecosystem,
             pEcosystem.livingCells.clearAndLabelGroups(); 
             updateUI(pEcosystem.livingCells); 
         } else
-            alert('Cannot export while the game is running');
+            alert('Cannot label cells while the game is running');
     });  
 
     // Split groups
@@ -128,7 +128,7 @@ export function addGridButtonListeners(pEcosystem: Ecosystem,
             pEcosystem.livingCells.splitGroups(); 
             updateUI(pEcosystem.livingCells); 
         } else
-            alert('Cannot export while the game is running');
+            alert('Cannot split groups while the game is running');
     }); 
 }
 
@@ -148,7 +148,7 @@ export function updateUI(pLiveCells: ListOfCells): void {
 
         for (let j:number = 0; j < kNbColumns; j++) {
             const kStrCoords: CellCoordinates = getStrCoordinates(j - kShiftX, i - kShiftY);
-            const kGroupId: number | undefined = pLiveCells.getGroupId(kStrCoords);
+            const kGroupId: GroupID | undefined = pLiveCells.getGroupId(kStrCoords);
 
             let wTdClasses: string = ''; 
             let wTdTooltip: string = ''; 
@@ -167,7 +167,7 @@ export function updateUI(pLiveCells: ListOfCells): void {
                 + `class="${wTdClasses}" `
                 // TODO: should be a class...
                 + ((kGroupId !== undefined) ? 
-                        'style="background-color: ' + CSS_GROUP_COLORS[kGroupId % CSS_GROUP_COLORS.length] + ';" ' 
+                        'style="background-color: ' + CSS_GROUP_COLORS[kGroupId.toNumber() % CSS_GROUP_COLORS.length] + ';" ' 
                         : '')
                 + ` > ${wTdTooltip} </td>`
                 ;
@@ -180,9 +180,9 @@ export function displayCycles(pEcosystem: Ecosystem): void {
     let wListOfCycles: string = '';
 
     pEcosystem.processCycles(
-        (pGroupId: number, pHasCycle: boolean, pLength: number) => {
+        (pGroupId: GroupID, pHasCycle: boolean, pLength: number) => {
             wListOfCycles += 
-                '<li ' + (pHasCycle? 'style="color: ' + CSS_GROUP_COLORS[pGroupId % CSS_GROUP_COLORS.length] + ';"' : '') + '>' + 
+                '<li ' + (pHasCycle? 'style="color: ' + CSS_GROUP_COLORS[pGroupId.toNumber() % CSS_GROUP_COLORS.length] + ';"' : '') + '>' + 
                     'Group: ' + pGroupId.toString() + 
                     (pHasCycle? ' - Length: ' + pLength.toString() : ' - X') + 
                 '</li>';

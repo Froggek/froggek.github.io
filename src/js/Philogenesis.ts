@@ -1,4 +1,4 @@
-import { CellCoordinates, CellState } from './cellUtils'; 
+import { CellCoordinates, CellState, GroupID } from './cellUtils'; 
 import { ListOfCells } from './ListOfCells';
 import { Cycle } from './cycles';
 
@@ -52,9 +52,9 @@ class Genealogy extends Array<ListOfCordinates> {
 }; 
 
 class Philogenesis {
-    private _genealogiesByGroup: Map<number, Genealogy> = new Map(); 
+    private _genealogiesByGroup: Map<GroupID, Genealogy> = new Map(); 
 
-    private addNewGenerationToGroup(pGroupId: number): void {
+    private addNewGenerationToGroup(pGroupId: GroupID): void {
         // If the group has no genealogy yet, we create it 
         if (! this._genealogiesByGroup.has(pGroupId))
             this._genealogiesByGroup.set(pGroupId, new Genealogy()); 
@@ -62,16 +62,16 @@ class Philogenesis {
         this._genealogiesByGroup.get(pGroupId)?.push(new ListOfCordinates()); 
     }
 
-    private addCellToLatestGeneration(pGroupId: number, pCoords: CellCoordinates): void {
+    private addCellToLatestGeneration(pGroupId: GroupID, pCoords: CellCoordinates): void {
         this._genealogiesByGroup.get(pGroupId)?.addCellCoordinatesToCurrentGeneration(pCoords); 
     }
 
-    private removeGenealogy(pGroupId: number): boolean {
+    private removeGenealogy(pGroupId: GroupID): boolean {
         return this._genealogiesByGroup.delete(pGroupId); 
     }
 
-    private removeGenealogies(pGroupIds: Set<number>): void {
-        this._genealogiesByGroup.forEach((_, _groupId: number) => {
+    private removeGenealogies(pGroupIds: Set<GroupID>): void {
+        this._genealogiesByGroup.forEach((_, _groupId: GroupID) => {
             if (! pGroupIds.has(_groupId))
                 this.removeGenealogy(_groupId); 
         }); 
@@ -79,13 +79,13 @@ class Philogenesis {
 
     public addNewGeneration(pCells: ListOfCells): void {
         // For each group, do we already have the new generation? 
-        let wGroupsWithNewGeneration: Set<number> = new Set();
+        let wGroupsWithNewGeneration: Set<GroupID> = new Set();
         
         pCells.processCells((_state: CellState, _coords: CellCoordinates) => {
             if (! _state.hasGroup())
                 return; 
             
-            const kGroupId = _state.groupId(); 
+            const kGroupId:GroupID = _state.groupId(); 
             
             // Is the generation has not been added, we create it now
             if (! wGroupsWithNewGeneration.has(kGroupId)) {
@@ -106,9 +106,9 @@ class Philogenesis {
         }); 
     }
 
-    public processCycles(pCallBack: (_groupId: number, _hasCycle: boolean, _length: number) => void): void {
+    public processCycles(pCallBack: (_groupId: GroupID, _hasCycle: boolean, _length: number) => void): void {
         this._genealogiesByGroup.forEach(
-            (_genealogy: Genealogy, _groupId: number) => {
+            (_genealogy: Genealogy, _groupId: GroupID) => {
                 pCallBack(_groupId, _genealogy.hasCycle(), _genealogy.getCycleLength()); 
             }); 
     }
@@ -127,7 +127,7 @@ export class Ecosystem {
         this._philogenesis.updateCycles(); 
     }
 
-    public processCycles(pCallBack: (_groupId: number, _hasCycle: boolean, _length: number) => void): void {
+    public processCycles(pCallBack: (_groupId: GroupID, _hasCycle: boolean, _length: number) => void): void {
         this._philogenesis.processCycles(pCallBack); 
     }
 }; 

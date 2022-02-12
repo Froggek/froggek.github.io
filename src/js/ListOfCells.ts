@@ -1,4 +1,4 @@
-import { CellCoordinates, CellState, getStrCoordinates } from './cellUtils'; 
+import { CellCoordinates, CellState, getStrCoordinates, GroupID } from './cellUtils'; 
 
 export class ListOfCells {
      
@@ -16,8 +16,8 @@ export class ListOfCells {
     }; 
     public set(pCoords: CellCoordinates): void; 
     public set(pCoords: CellCoordinates, pState: CellState): void; 
-    public set(pCoords: CellCoordinates, pGroupId: number): void; 
-    public set(pCoords: CellCoordinates, pStateOrGroupId?: CellState | number): void {
+    public set(pCoords: CellCoordinates, pGroupId: GroupID): void; 
+    public set(pCoords: CellCoordinates, pStateOrGroupId?: CellState | GroupID): void {
         if (pStateOrGroupId === undefined)
             this._list.set(pCoords, new CellState());
 
@@ -63,16 +63,16 @@ export class ListOfCells {
         return true; 
     }
 
-    public getGroupId(pCoords: CellCoordinates): number | undefined {
+    public getGroupId(pCoords: CellCoordinates): GroupID | undefined {
         return this._list.get(pCoords)?.hasGroup() 
             ? this._list.get(pCoords)?.groupId() 
             : undefined; 
     }
-    public setGroupId(pCoords: CellCoordinates, pGroupId: number): number | undefined {
+    public setGroupId(pCoords: CellCoordinates, pGroupId: GroupID): GroupID | undefined {
         return this.getCell(pCoords)?.setGroupId(pGroupId); 
     }
-    public setNewGroupId(pCoords: CellCoordinates): number | undefined {
-        return this.getCell(pCoords)?.setNewGroupId();     
+    public setNewGroupId(pCoords: CellCoordinates): GroupID | undefined {
+        return this.getCell(pCoords)?.setNewGroupId(); 
     } 
 
     /** ALL the neighbors */
@@ -176,18 +176,18 @@ export class ListOfCells {
      * 
      * E.g.: 111_222 => 111|*|222 => 111|1|111 
      */
-    public labelCell(pCellToLabelCoords: CellCoordinates): number | undefined {
+    public labelCell(pCellToLabelCoords: CellCoordinates): GroupID | undefined {
         const kNeighborCoords: CellCoordinates[] = this.getLivingNeighborCoords(pCellToLabelCoords); // All live neighbors  
         
         if (! kNeighborCoords.length)
             return this.setNewGroupId(pCellToLabelCoords); 
 
         // Are there different group IDs? What's the min one? 
-        let wGroupIds: Set<number> = new Set(); 
+        let wGroupIds: Set<GroupID> = new Set(); 
 
         kNeighborCoords.forEach( pCoords => {
             let wCell: CellState | undefined = this.getCell(pCoords);
-            
+
             if (wCell && wCell.hasGroup()) 
                 wGroupIds.add(wCell.groupId()); 
         });
@@ -197,7 +197,7 @@ export class ListOfCells {
 
         // Otherwise, multiple groups ==> merge is required 
         // MIN group ID is kept 
-        const kMinGroupId: number = Math.min(...wGroupIds); 
+        const kMinGroupId: GroupID = new GroupID(Math.min(Number(...wGroupIds))); 
 
         // TODO: move to another function 
         this.processCells((pState: CellState, _: CellCoordinates) => {
@@ -210,43 +210,55 @@ export class ListOfCells {
 
     /** Splitting groups */
     public splitGroups(): void {
-        const kInitUnreachableGroupId: number = CellState.maxGroupId() + 1; 
-        let wCurrentGroupId: number = kInitUnreachableGroupId;
-        let wCurrentGroup: Map<CellCoordinates, CellState> = new Map(); 
+        let wOriginalGroupIDs: Set<GroupID> = new Set();
 
-        this.processCells((_state: CellState, _coords: CellCoordinates) => {
-            if (_state.hasGroup())
-                wCurrentGroupId = Math.min(wCurrentGroupId, _state.groupId()); 
+        // For each group, we set a pioneer (arbitrarily: the first one) 
+        this.processCells((_state: CellState /*, _coords: CellCoordinates*/) => {
+            if (_state.hasGroup() && (! wOriginalGroupIDs.has(_state.groupId()))) 
+                wOriginalGroupIDs.add(_state.groupId())
         }); 
 
-        // Just in case... 
-        if (wCurrentGroupId === kInitUnreachableGroupId) 
-            return; 
         
-        // All the cells from the current group are assigned a temp group ID 
-        this.processCells((_state: CellState, _coords: CellCoordinates) => {
-            if (_state.groupId() === wCurrentGroupId) {
-                _state.setUndefinedGroupId();
-                
-                // Arbitrarily, the first cell will form the group
-                if (! wCurrentGroup.size)
-                    wCurrentGroup.set(_coords, _state); 
-            }
-        }); 
+        while (wOriginalGroupIDs.size) {
+            const [kCurrentGroupID] = wOriginalGroupIDs; 
+            let wRemainingFromOriginalSingleGroup: Set<CellCoordinates> = new Set(); 
 
-        let wSubGroupId = wCurrentGroupId; 
-
-        while (wCurrentGroup.size) {
-            const [[_coords, _state]] = wCurrentGroup; 
-            
-            // Finding neighbors in the group
-            let wNeighborsInGroup = this.getLivingNeighborCoords(_coords, true);
-            wNeighborsInGroup.forEach((_neighborCoords: CellCoordinates) => { 
-                wCurrentGroup.set(_neighborCoords, this.getCell(_neighborCoords)!) 
+            // All the cells from the group are assigned a temp (UNDEF) group ID
+            // ==> The group is then isolated 
+            this.processCells((_state: CellState, _coords: CellCoordinates) => {
+                if (_state.groupId() === kCurrentGroupID) {
+                    _state.setUndefinedGroupId();
+                    wRemainingFromOriginalSingleGroup.add(_coords); 
+                }
             }); 
-            // The initial cell gets labelled, and is removed from the temp list
-            _state.setGroupId(wSubGroupId);
-            wCurrentGroup.delete(_coords);      
-        } // End while: the new group is completely formed 
+
+            let wSubGroupId: GroupID = kCurrentGroupID; 
+
+            while (wRemainingFromOriginalSingleGroup.size) {
+                let wSubGroup: Set<CellCoordinates> = new Set(); 
+                const [[kFirstInSubGroup]] = wRemainingFromOriginalSingleGroup; 
+                wSubGroup.add(kFirstInSubGroup);   
+
+                while (wSubGroup.size) {
+                    const [[kSubGroupElement]] = wSubGroup; 
+
+                    // Finding neighbors in the group
+                    this.getLivingNeighborCoords(kSubGroupElement, /*in same group*/true)
+                    .forEach((_neighborCoords: CellCoordinates) => { 
+                        wSubGroup.add(_neighborCoords);  
+                    }); 
+
+                    // The initial cell gets labelled, and is removed from the temp list
+                    this.setGroupId(kSubGroupElement, wSubGroupId);
+                    wSubGroup.delete(kSubGroupElement);  
+                    wRemainingFromOriginalSingleGroup.delete(kSubGroupElement);   
+                }
+                
+                // We need a NEW (original) group ID 
+                wSubGroupId = CellState.newGroupId(); 
+            } 
+
+            wOriginalGroupIDs.delete(kCurrentGroupID); 
+        }
     }
 }; 
