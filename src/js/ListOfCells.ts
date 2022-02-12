@@ -236,11 +236,11 @@ export class ListOfCells {
 
             while (wRemainingFromOriginalSingleGroup.size) {
                 let wSubGroup: Set<CellCoordinates> = new Set(); 
-                const [[kFirstInSubGroup]] = wRemainingFromOriginalSingleGroup; 
+                const [kFirstInSubGroup] = wRemainingFromOriginalSingleGroup; 
                 wSubGroup.add(kFirstInSubGroup);   
 
                 while (wSubGroup.size) {
-                    const [[kSubGroupElement]] = wSubGroup; 
+                    const [kSubGroupElement] = wSubGroup; 
 
                     // Finding neighbors in the group
                     this.getLivingNeighborCoords(kSubGroupElement, /*in same group*/true)

@@ -60,7 +60,7 @@ export function applyLifeRules(pLiveCells: ListOfCells): void {
      *      - AFTER resurrecting dead cells 
      *      - And BEFORE removing dead cells 
      */
-     wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
+    wCellDelta.forEach((_willLive: boolean, _coords: CellCoordinates) => {
         if (_willLive) 
             pLiveCells.labelCell(_coords);   
     }); 
@@ -70,4 +70,7 @@ export function applyLifeRules(pLiveCells: ListOfCells): void {
         if (! _willLive) // Death 
         pLiveCells.delete(_coords); 
     }); 
+
+    // We might have to split groups, and re-label them
+    pLiveCells.splitGroups(); 
 }
