@@ -1,7 +1,9 @@
 import $ from 'jquery';
 
-import { ListOfCells, getStrCoordinates, CellCoordinates } from './cellUtils';
-import { SituationHistory } from './cycles';
+import { getStrCoordinates, CellCoordinates, GroupID } from './cellUtils';
+import { ListOfCells } from './ListOfCells';
+import { serializeToJSON } from './cellJSONFormats';
+import { Ecosystem } from './Philogenesis';
 
 const HTML_GRID_BODY_ID:string = 'game-grid-body';
 const HTML_EXPORT_AREA_ID:string = 'export-area';
@@ -9,8 +11,15 @@ const HTML_CYCLES_AREA_ID: string ='cycles-panel-content';
 const HTML_START_PAUSE_BTN_ID: string = 'start-btn';
 const HTML_EXPORT_BTN_ID: string = 'export-btn'; 
 const HTML_LABEL_REFRESH_BTN_ID: string = 'label-and-paint-btn'; 
+const HTML_SPLIT_GROUPS_BTN_ID: string = 'split-groups-btn'; 
 
 const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell';
+const CSS_TOOLTIP_GRID_CLASS_NAME: string = 'css-tooltip-grid'; 
+const CSS_TOOLTIP_GRID_CONTENT_CLASS_NAME: string = CSS_TOOLTIP_GRID_CLASS_NAME + '-content'; 
+
+const CSS_GROUP_COLORS = [ /* "black", */ "silver", "gray", "maroon", "red", 
+    "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua" ];
+
 
 export enum GameStatus {
     PLAYING = "PLAYING",
@@ -30,7 +39,7 @@ export function addGridListeners(pLivingCells: ListOfCells, pDocument: Document)
         if (kHtmlElt.is(`#${HTML_GRID_BODY_ID} *`)) {
 
             // Is the cell dead or alive?
-            const kStrCoords:string = getStrCoordinates( /* x= */ kHtmlElt.data('col'), /* y= */ kHtmlElt.parent().data('row') );
+            const kStrCoords:CellCoordinates = getStrCoordinates( /* x= */ kHtmlElt.data('col'), /* y= */ kHtmlElt.parent().data('row') );
 
             if (pLivingCells.has(kStrCoords)) { // Alive => Dead
                 pLivingCells.delete(kStrCoords);
@@ -59,10 +68,10 @@ function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
 }
 
 
-export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHistory: SituationHistory,
+export function addGridButtonListeners(pEcosystem: Ecosystem,
         pComponents: GridUIComponents, 
         pLifeRound: (l: ListOfCells) => void,
-        pCycleDetection: (l: ListOfCells, h: SituationHistory) => void,
+        pCycleDetection: (e: Ecosystem) => void,
         pInitialLabelling? : (l: ListOfCells) => void): void {
 
     // Start/Pause button
@@ -70,16 +79,16 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHist
         if (pComponents.status === 'PAUSED') { // Pause => Playing
             /** Initialization */
             if (pInitialLabelling)
-                pInitialLabelling(pLivingCells);
+                pInitialLabelling(pEcosystem.livingCells);
             
-            // The initial situation needs to be added to the "Situation Memory"
-            pSituationHistory.addSituation(pLivingCells); 
+            // The currnet living cells form the first generation 
+            pEcosystem.recordNewGeneration(); 
 
             /** Here we go! */
             pComponents.repeat = setInterval(() => 
                 {
-                    pLifeRound(pLivingCells); 
-                    pCycleDetection(pLivingCells, pSituationHistory);
+                    pLifeRound(pEcosystem.livingCells);  
+                    pCycleDetection(pEcosystem);
                 }, 
                 1000);
 
@@ -98,22 +107,29 @@ export function addGridButtonListeners(pLivingCells: ListOfCells, pSituationHist
     // Export btn
     $(`#${HTML_EXPORT_BTN_ID}`).on('click', e => {
         if (pComponents.status === GameStatus.PAUSED) {
-            $(`#${HTML_EXPORT_AREA_ID}`).text(pLivingCells.serializeSituation2JSON());
+            $(`#${HTML_EXPORT_AREA_ID}`).text(serializeToJSON(pEcosystem.livingCells));
         } else
             alert('Cannot export while the game is running');
     });
 
     /**  DEBUG STUFFS */
-    // Label & Refresh UI
+    // Label groups & Refresh UI
     $(`#${HTML_LABEL_REFRESH_BTN_ID}`).on('click', e => {
         if (pComponents.status === GameStatus.PAUSED) {
-            pLivingCells.clearAndLabelGroups(); 
-            updateUI(pLivingCells); 
+            pEcosystem.livingCells.clearAndLabelGroups(); 
+            updateUI(pEcosystem.livingCells); 
         } else
-            alert('Cannot export while the game is running');
+            alert('Cannot label cells while the game is running');
     });  
 
-
+    // Split groups
+    $(`#${HTML_SPLIT_GROUPS_BTN_ID}`).on('click', e => {
+        if (pComponents.status === GameStatus.PAUSED) {
+            pEcosystem.livingCells.splitGroups(); 
+            updateUI(pEcosystem.livingCells); 
+        } else
+            alert('Cannot split groups while the game is running');
+    }); 
 }
 
 export function updateUI(pLiveCells: ListOfCells): void {
@@ -125,8 +141,6 @@ export function updateUI(pLiveCells: ListOfCells): void {
     const kNbColumns:number = 30;
     const kShiftX:number = Math.floor(kNbColumns / 2);
 
-    const kGroupColors = [ /* "black", */ "silver", "gray", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua" ];
-
     kTableBody.html('');
 
     for (let i:number = 0; i < kNbRows; i++) {
@@ -134,33 +148,49 @@ export function updateUI(pLiveCells: ListOfCells): void {
 
         for (let j:number = 0; j < kNbColumns; j++) {
             const kStrCoords: CellCoordinates = getStrCoordinates(j - kShiftX, i - kShiftY);
-            const kGroupId: number | undefined = pLiveCells.getGroupId(kStrCoords);
+            const kGroupId: GroupID | undefined = pLiveCells.getGroupId(kStrCoords);
+
+            let wTdClasses: string = ''; 
+            let wTdTooltip: string = ''; 
+
+            if (pLiveCells.has(kStrCoords)) {
+                wTdClasses += CSS_LIVE_CELL_CLASS_NAME; 
+
+                if (kGroupId !== undefined) {
+                    wTdClasses += ` ${CSS_TOOLTIP_GRID_CLASS_NAME}`; 
+                    wTdTooltip += `<span class="${CSS_TOOLTIP_GRID_CONTENT_CLASS_NAME}">Group #${kGroupId}</span>`; 
+                }
+            }
 
             tr += '<td data-col="' + (j - kShiftX) + '" '
                 // Dead or alive
-                + (pLiveCells.has(kStrCoords) ? `class="${CSS_LIVE_CELL_CLASS_NAME}" ` : '')
+                + `class="${wTdClasses}" `
                 // TODO: should be a class...
-                + ((kGroupId !== undefined) ? 'style="background-color: ' + kGroupColors[kGroupId % kGroupColors.length ] + '" ' : '')
-                + ' ></td>'
+                + ((kGroupId !== undefined) ? 
+                        'style="background-color: ' + CSS_GROUP_COLORS[kGroupId.toNumber() % CSS_GROUP_COLORS.length] + ';" ' 
+                        : '')
+                + ` > ${wTdTooltip} </td>`
                 ;
         }
         kTableBody.append(tr + '</tr>');
     }
 }
 
-export function displayCycles(pSituations: SituationHistory): void {
-    if (pSituations.hasCycles()) {
-        let wListOfCycles: string = '';
+export function displayCycles(pEcosystem: Ecosystem): void {
+    let wListOfCycles: string = '';
 
-        pSituations.processCycles(
-            (pLength: number) => {
-                wListOfCycles += '<li>Length: ' + pLength.toString() + '</li>';
-            })
+    pEcosystem.processCycles(
+        (pGroupId: GroupID, pHasCycle: boolean, pLength: number) => {
+            wListOfCycles += 
+                '<li ' + (pHasCycle? 'style="color: ' + CSS_GROUP_COLORS[pGroupId.toNumber() % CSS_GROUP_COLORS.length] + ';"' : '') + '>' + 
+                    'Group: ' + pGroupId.toString() + 
+                    (pHasCycle? ' - Length: ' + pLength.toString() : ' - X') + 
+                '</li>';
+        })
 
-        $(`#${HTML_CYCLES_AREA_ID}`).html(
-            '<ul>' +
-                wListOfCycles +
-            '</ul>'
-        );
-    }
+    $(`#${HTML_CYCLES_AREA_ID}`).html(
+        '<ul>' +
+            wListOfCycles +
+        '</ul>'
+    );
 }

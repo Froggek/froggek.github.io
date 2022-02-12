@@ -17,21 +17,44 @@
     background-color: black;
 }
 
-/*#game-grid td {
-    display: block; 
-    float: left; 
-    width: 32%; 
-    padding-bottom: 32%; 
+/* 
+ * Tooltips 
+ * See https://stackoverflow.com/questions/13845003/tooltips-for-cells-in-html-table-no-javascript
+ *  => https://stackoverflow.com/a/41705322 
+ */
 
-    border: 1px solid black; 
+.css-tooltip-grid {
+    position: relative;
 }
 
-#game-grid td div {
-    position: absolute; 
+.css-tooltip-grid-content {
+    display: none;
+    position: absolute;
+    z-index: 100;
+
+    width: 120px;
+    bottom: 135%; 
+    left: 50%; 
+    margin-left: -60px; /* half of the width */
+    background-color: black;
+    color: #fff; 
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
 }
 
+/* Adding a tooltip arrow */
+.css-tooltip-grid .css-tooltip-grid-content::after {
+    content: " "; 
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%; 
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+}
 
-#game-grid, #game-grid tr, #game-grid tbody {
-    display: block;  
-    width: 100%; 
-} */
+.css-tooltip-grid:hover span.css-tooltip-grid-content {
+    display: block;
+}

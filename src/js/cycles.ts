@@ -1,55 +1,25 @@
-import { ListOfCells } from './cellUtils'; 
+export class Cycle {
+    public static readonly NO_CYCLE_LENGTH: number = 0;  
+    private _length: number; 
+    
+    constructor(); 
+    constructor(pLength: number); 
+    constructor(pLength?: number) {
+        if (pLength)
+            this._length = pLength;
+        else 
+            this._length = Cycle.NO_CYCLE_LENGTH;  
+    }
 
-
-type Situation = ListOfCells; 
-
-class Cycle {
-    _length: number; 
-
-    constructor(pLength: number) {
+    public getLength(): number {
+        return this._length; 
+    }
+    public setLength(pLength: number): void {
         this._length = pLength; 
     }
-}; 
-
-// type GroupSituationMemory = Map<number, >; 
-
-export class SituationHistory {
-    private _situations: Array<Situation> = new Array();
-    private _cycles: Array<Cycle> = new Array(); 
-
-    public addSituation(pSituation: Situation) {
-        this._situations.push(pSituation.deepCopy()); 
-    } 
-
-    public hasCycles(): boolean {
-        return !! this._cycles.length; 
-    }
-
-    private searchCycleWithLastSituation(): Cycle | null { 
-        let i: number = this._situations.length - 2;
-        const kLastSituation: Situation = this._situations[i + 1]; 
-        let wFound: boolean = false; 
-
-        while ((! wFound) && (i >= 0)) {
-            wFound = this._situations[i].isEqualTo(kLastSituation); 
-            i--; 
-        } 
-
-        return ( wFound? new Cycle((this._situations.length - 1) - (i + 1)): null ); 
-    }
-
-    public searchForCycles(): void {
-        if (this.hasCycles())
-            return; 
-        
-        let pCycle: Cycle | null = this.searchCycleWithLastSituation(); 
-
-        if (pCycle)
-            this._cycles.push(pCycle); 
-    }
-
-    public processCycles(pCallBack: (pLength: number) => void): void {
-        this._cycles.forEach((_c: Cycle) => { pCallBack(_c._length) }); 
+    public resetLength(): void {
+        this.setLength(Cycle.NO_CYCLE_LENGTH); 
     }
 }; 
+
 

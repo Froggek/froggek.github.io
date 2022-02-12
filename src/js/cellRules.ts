@@ -1,4 +1,5 @@
-import { CellCoordinates, ListOfCells } from './cellUtils'; 
+import { CellCoordinates } from './cellUtils';
+import { ListOfCells } from './ListOfCells'; 
 
 /**  Applying rules 
  * 1-Any live cell with two or three live neighbours survives.
