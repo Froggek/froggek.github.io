@@ -186,7 +186,7 @@ export function displayCycles(pEcosystem: Ecosystem): void {
                     'Group: ' + pGroupId.toString() + 
                     (pHasCycle? ' - Length: ' + pLength.toString() : ' - X') + 
                 '</li>';
-        })
+        }, /*order by groups*/ true); 
 
     $(`#${HTML_CYCLES_AREA_ID}`).html(
         '<ul>' +
