@@ -182,7 +182,7 @@ export function displayCycles(pEcosystem: Ecosystem): void {
     pEcosystem.processCycles(
         (pGroupId: GroupID, pHasCycle: boolean, pLength: number) => {
             wListOfCycles += 
-                '<li ' + (pHasCycle? 'style="color: ' + CSS_GROUP_COLORS[pGroupId.toNumber() % CSS_GROUP_COLORS.length] + ';"' : '') + '>' + 
+                '<li style="color: ' + CSS_GROUP_COLORS[pGroupId.toNumber() % CSS_GROUP_COLORS.length] + ';" >' + 
                     'Group: ' + pGroupId.toString() + 
                     (pHasCycle? ' - Length: ' + pLength.toString() : ' - X') + 
                 '</li>';
