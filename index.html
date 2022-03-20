@@ -12,43 +12,38 @@
     </head>
     
     <body>
-        <!-- Upper menu: cycles, config... -->
-        <p>
-            <a class="btn btn-primary" data-bs-toggle="collapse" href="#cycles-panel" role="button" aria-expanded="false" aria-controls="cycles-panel">Cycles</a>
-            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#other-panel" aria-expanded="false" aria-controls="other-panel">Others...</button>
-            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target=".multi-collapse" aria-expanded="false" aria-controls="cycles-panel other-panel">All...</button>
-        </p>
-        <div class="row">
-            <div class="col">
-                <div class="collapse multi-collapse" id="cycles-panel">
-                    <div class="card card-body" id="cycles-panel-content" >
-                        Everything about cycles! 
+        <div class="container">
+            <div class="row">
+                <!-- Controls -->
+                <div class="col-2">
+                    <!-- Upper menu: cycles, config... -->
+                    <div>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#cycles-panel" aria-expanded="false" aria-controls="cycles-panel">Cycles</button>
+                        <button type="button" id="start-btn" class="btn btn-primary">GO!</button>
+                    </div>
+                    <div>
+                        <!-- TODO: clear grid -->
+                        <button type="button" id="export-btn" class="btn btn-info">Export</button>
+                        <button type="button" id="label-and-paint-btn" class="btn btn-info">Label & Refresh</button>
+                        <button type="button" id="split-groups-btn" class="btn btn-info">Split Groups & Refresh</button>
+                    </div>
+                    <div style="min-height: 120px;">
+                        <div class="collapse collapse-horizontal" id="cycles-panel">
+                            <div class="card card-body" style="width: 300px;" id="cycles-panel-content" >
+                                Everything about cycles!
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col">
-                <div class="collapse multi-collapse" id="other-panel">
-                    <div class="card card-body">
-                    Some placeholder content for the second collapse component of this multi-collapse example. This panel is hidden by default but revealed when the user activates the relevant trigger.
-                    </div>
+                <!-- Game (grid)-->
+                <div class="col-10">
+                    <table id="game-grid"> 
+                        <tbody id="game-grid-body">
+                            <!-- Here comes the grid -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
-
-        <!-- Grid -->
-        <table id="game-grid"> 
-            <tbody id="game-grid-body">
-                <!-- Grid -->
-            </tbody>
-        </table>
-
-        <br/><br/>
-        <div>
-            <button type="button" id="start-btn" class="btn btn-primary">GO!</button>
-            <!-- TODO: clear grid -->
-            <button type="button" id="export-btn" class="btn btn-info">Export</button>
-            <button type="button" id="label-and-paint-btn" class="btn btn-info">Label & Refresh</button>
-            <button type="button" id="split-groups-btn" class="btn btn-info">Split Groups & Refresh</button>
         </div>
 
         <div id="export-area"></div>

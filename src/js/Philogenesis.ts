@@ -106,11 +106,17 @@ class Philogenesis {
         }); 
     }
 
-    public processCycles(pCallBack: (_groupId: GroupID, _hasCycle: boolean, _length: number) => void): void {
-        this._genealogiesByGroup.forEach(
-            (_genealogy: Genealogy, _groupId: GroupID) => {
-                pCallBack(_groupId, _genealogy.hasCycle(), _genealogy.getCycleLength()); 
-            }); 
+    public processCycles(pCallBack: (_groupId: GroupID, _hasCycle: boolean, _length: number) => void, 
+        pOrderByGroups: boolean): void {
+        
+        (pOrderByGroups ? 
+        new Map([...this._genealogiesByGroup.entries()].sort((_g1, _g2) => Number(_g1[0]) - Number(_g2[0]))) 
+        : this._genealogiesByGroup)
+            .forEach(
+                (_genealogy: Genealogy, _groupId: GroupID) => {
+                    pCallBack(_groupId, _genealogy.hasCycle(), _genealogy.getCycleLength()); 
+                }
+            ); 
     }
 
 }; 
@@ -127,8 +133,9 @@ export class Ecosystem {
         this._philogenesis.updateCycles(); 
     }
 
-    public processCycles(pCallBack: (_groupId: GroupID, _hasCycle: boolean, _length: number) => void): void {
-        this._philogenesis.processCycles(pCallBack); 
+    public processCycles(pCallBack: (_groupId: GroupID, _hasCycle: boolean, _length: number) => void, 
+        pOrderBygroups: boolean = false): void {
+        this._philogenesis.processCycles(pCallBack, pOrderBygroups); 
     }
 }; 
 
