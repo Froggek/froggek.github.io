@@ -57,8 +57,8 @@ function updateBtnState(pBtnID: string, pComponents: GridUIComponents): void {
     switch (pBtnID) {
         case HTML_START_PAUSE_BTN_ID:
             (pComponents.status === GameStatus.PLAYING) ?
-                $(`#${HTML_START_PAUSE_BTN_ID}`).text('Pause') :
-                $(`#${HTML_START_PAUSE_BTN_ID}`).text('GO!');
+                $(`#${HTML_START_PAUSE_BTN_ID}`).html('&#124;&#124;') :
+                $(`#${HTML_START_PAUSE_BTN_ID}`).html('&gt;');
                 // TODO use https://getbootstrap.com/docs/5.1/components/buttons/#toggle-states
             break;
 
