@@ -49,6 +49,12 @@ hydrateSituationFromJSON(
 */
 
 // V1 
+/* 
+deserializeFromJSON(
+    '{"liveCells":[{"x":-9,"y":-8},{"x":-9,"y":-7},{"x":-10,"y":-6},{"x":-8,"y":-6},{"x":-9,"y":-5},{"x":-9,"y":-4},{"x":-9,"y":-2},'
+    + '{"x":-9,"y":-3},{"x":-10,"y":-1},{"x":-8,"y":-1},{"x":-9,"y":0},{"x":-9,"y":1}]}', 
+    ecosystem.livingCells); 
+*/
 
 
 /** Spaceship - Glider */

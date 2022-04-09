@@ -12,7 +12,6 @@ class ListOfCordinates extends Set<CellCoordinates> {
             if (! pRHS.has(_elt))
                 return false; 
         } 
-
         return true; 
     }
 }; 
