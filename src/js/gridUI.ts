@@ -12,6 +12,7 @@ const HTML_START_PAUSE_BTN_ID: string = 'start-btn';
 const HTML_EXPORT_BTN_ID: string = 'export-btn'; 
 const HTML_LABEL_REFRESH_BTN_ID: string = 'label-and-paint-btn'; 
 const HTML_SPLIT_GROUPS_BTN_ID: string = 'split-groups-btn'; 
+const HTML_FORWARD_BTN_ID: string = 'forward-state-btn'; 
 
 const CSS_LIVE_CELL_CLASS_NAME: string = 'live-cell';
 const CSS_TOOLTIP_GRID_CLASS_NAME: string = 'css-tooltip-grid'; 
@@ -74,21 +75,28 @@ export function addGridButtonListeners(pEcosystem: Ecosystem,
         pCycleDetection: (e: Ecosystem) => void,
         pInitialLabelling? : (l: ListOfCells) => void): void {
 
+    const lifeStep = (_ecosystem: Ecosystem) => {
+        pLifeRound(pEcosystem.livingCells);  
+        pCycleDetection(pEcosystem); 
+    }; 
+
     // Start/Pause button
     $(`#${HTML_START_PAUSE_BTN_ID}`).on('click', e => {
         if (pComponents.status === 'PAUSED') { // Pause => Playing
-            /** Initialization */
-            if (pInitialLabelling)
-                pInitialLabelling(pEcosystem.livingCells);
-            
-            // The currnet living cells form the first generation 
-            pEcosystem.recordNewGeneration(); 
+            // Only the first time 
+            if (! pEcosystem.hasHistoryStarted()) {
+                // Initialization 
+                if (pInitialLabelling)
+                    pInitialLabelling(pEcosystem.livingCells);
+        
+                // The current living cells form the first generation 
+                pEcosystem.recordNewGeneration();
+            } 
 
             /** Here we go! */
             pComponents.repeat = setInterval(() => 
                 {
-                    pLifeRound(pEcosystem.livingCells);  
-                    pCycleDetection(pEcosystem);
+                    lifeStep(pEcosystem); 
                 }, 
                 1000);
 
@@ -103,6 +111,10 @@ export function addGridButtonListeners(pEcosystem: Ecosystem,
 
         updateBtnState(HTML_START_PAUSE_BTN_ID, pComponents);
     });
+
+    $(`#${HTML_FORWARD_BTN_ID}`).on('click', e => {
+        lifeStep(pEcosystem); 
+    }); 
 
     // Export btn
     $(`#${HTML_EXPORT_BTN_ID}`).on('click', e => {

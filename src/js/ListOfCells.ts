@@ -133,7 +133,7 @@ export class ListOfCells {
    }
 
     /** Gives to each set of neighbors a unique group ID  */
-    public clearAndLabelGroups(): void {
+    public  clearAndLabelGroups(): void {
         this.clearGroups(); 
         let wCellsToLabel: Set<CellCoordinates> = new Set(); 
 
@@ -149,19 +149,20 @@ export class ListOfCells {
             while(wCellsToLabel.size) {
                 const wCoords: CellCoordinates = wCellsToLabel.values().next().value; 
 
-                ListOfCells.getNeighborCoordinates(wCoords)
+                ListOfCells.getNeighborCoordinates(wCoords) // Among the neighbors 
                     .filter( 
-                        (pNeighborCoords) => { // Has the neighbor already been labeled? 
+                        (pNeighborCoords) => { // We only keep the non-labeled ones  
                             let wNeighbour: CellState | undefined = this._list.get(pNeighborCoords);  
                             return wNeighbour && (! wNeighbour.hasGroup()); 
                         })
                     .forEach(
-                        (pNeighborCoords) =>  { 
+                        (pNeighborCoords) =>  { // We label them, and add them to the list for future processing 
                             this._list.get(pNeighborCoords)!.setGroupId(pState.groupId()); 
                             wCellsToLabel.add(pNeighborCoords);  
                         }
                     ); 
 
+                // The initial cell has been labeled and processed, we can discard it 
                 wCellsToLabel.delete(wCoords); 
             }
         }); 

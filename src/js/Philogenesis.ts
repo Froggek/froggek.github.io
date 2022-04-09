@@ -69,9 +69,9 @@ class Philogenesis {
         return this._genealogiesByGroup.delete(pGroupId); 
     }
 
-    private removeGenealogies(pGroupIds: Set<GroupID>): void {
+    private removeGenealogies(pGroupIdsToKeep: Set<GroupID>): void {
         this._genealogiesByGroup.forEach((_, _groupId: GroupID) => {
-            if (! pGroupIds.has(_groupId))
+            if (! pGroupIdsToKeep.has(_groupId))
                 this.removeGenealogy(_groupId); 
         }); 
     }
@@ -86,7 +86,7 @@ class Philogenesis {
             
             const kGroupId:GroupID = _state.groupId(); 
             
-            // Is the generation has not been added, we create it now
+            // If the generation has not been added, we create it now
             if (! wGroupsWithNewGeneration.has(kGroupId)) {
                 this.addNewGenerationToGroup(kGroupId);
                 wGroupsWithNewGeneration.add(kGroupId); 
@@ -123,6 +123,7 @@ class Philogenesis {
 export class Ecosystem {
     public livingCells: ListOfCells = new ListOfCells(); 
     private _philogenesis: Philogenesis = new Philogenesis(); 
+    private _hasHistoryStarted: boolean = false; 
 
     public recordNewGeneration(): void {
         this._philogenesis.addNewGeneration(this.livingCells); 
@@ -135,6 +136,17 @@ export class Ecosystem {
     public processCycles(pCallBack: (_groupId: GroupID, _hasCycle: boolean, _length: number) => void, 
         pOrderBygroups: boolean = false): void {
         this._philogenesis.processCycles(pCallBack, pOrderBygroups); 
+    }
+
+    public hasHistoryStarted(): boolean {
+        return this._hasHistoryStarted; 
+    }
+
+    public startHistory(): void {
+        if (this.hasHistoryStarted())
+            throw "The history of this ecosystem has already started."
+
+        this._hasHistoryStarted = true;
     }
 }; 
 
